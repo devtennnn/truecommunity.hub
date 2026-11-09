@@ -3,6 +3,17 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+  <!-- ADD TO HOME SCREEN (iOS + Android): name "TRUE Club" + TRUE logo -->
+  <link rel="manifest" href="manifest.json" />
+  <meta name="theme-color" content="#11141a" />
+  <meta name="application-name" content="TRUE Club" />
+  <meta name="mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-title" content="TRUE Club" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black" />
+  <link rel="apple-touch-icon" href="https://i.postimg.cc/rskLgm5v/TRUE-LOGO.jpg" />
+  <link rel="icon" href="https://i.postimg.cc/rskLgm5v/TRUE-LOGO.jpg" />
   <title>TRUE Community — Live Multiplayer Pixel Clubhouse</title>
   <!-- Google Fonts: Press Start 2P, VT323, and Kantumruy Pro (Khmer) -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -236,6 +247,10 @@
           </div>
           <button onclick="logoutUser()" class="ml-2 text-xs text-gray-400 hover:text-pixelCoral px-1.5 py-0.5 border border-gray-700" title="Logout">✕</button>
         </div>
+
+        <button id="installBtn" onclick="installApp()" class="pixel-btn bg-trueSlate hover:bg-trueGreen hover:text-trueVoid text-white px-2.5 py-1.5 text-xs font-bold flex items-center gap-1.5">
+          <span>📲</span><span data-i18n="btn_install">Install App</span>
+        </button>
 
         <div class="flex bg-trueVoid p-1 border-2 border-black">
           <button id="btnLangEN" onclick="setLanguage('en')" class="px-2.5 py-1 text-xs font-bold bg-trueGreen text-trueVoid transition">
@@ -661,7 +676,17 @@
         spin_btn: "SPIN",
         slots_paytable: "3 same: 🍒×4 🍋×6 🔔×10 💎×20 7️⃣×50 · Any pair: bet returned",
         slot_triple: "JACKPOT! You won",
-        slot_pair: "A pair! Your bet is returned"
+        slot_pair: "A pair! Your bet is returned",
+        btn_install: "Install App",
+        install_title: "ADD TRUE CLUB TO HOME SCREEN",
+        install_sub: "Open TRUE Community like a real app, full screen.",
+        install_ios_1: "Open this page in Safari, then tap the Share button (the square with an arrow ⬆️) at the bottom of the screen.",
+        install_ios_2: "Scroll down and tap “Add to Home Screen”.",
+        install_ios_3: "Check the name “TRUE Club” and tap Add. The TRUE logo appears on your home screen.",
+        install_and_1: "Tap the ⋮ menu at the top right of your browser (Chrome).",
+        install_and_2: "Tap “Install app” (or “Add to Home screen”).",
+        install_and_3: "Confirm. The TRUE Club icon appears on your home screen.",
+        install_done: "✅ Installed! Open TRUE Club from your home screen."
       },
       kh: {
         hud_online: "នាក់ក្នុងបន្ទប់",
@@ -752,7 +777,17 @@
         spin_btn: "បង្វិល",
         slots_paytable: "ដូចគ្នា 3: 🍒×4 🍋×6 🔔×10 💎×20 7️⃣×50 · ដូចគ្នា 2: សង់កាក់ភ្នាល់វិញ",
         slot_triple: "ជ័យលាភី! អ្នកឈ្នះ",
-        slot_pair: "ដូចគ្នា 2! សង់កាក់ភ្នាល់វិញ"
+        slot_pair: "ដូចគ្នា 2! សង់កាក់ភ្នាល់វិញ",
+        btn_install: "តំឡើងកម្មវិធី",
+        install_title: "បន្ថែម TRUE CLUB ទៅអេក្រង់ដើម",
+        install_sub: "បើក TRUE Community ដូចកម្មវិធីពិតប្រាកដ ពេញអេក្រង់។",
+        install_ios_1: "បើកទំព័រនេះក្នុង Safari រួចចុចប៊ូតុង Share (ការ៉េមានព្រួញ ⬆️) នៅខាងក្រោមអេក្រង់។",
+        install_ios_2: "អូសចុះក្រោម រួចចុច “Add to Home Screen”។",
+        install_ios_3: "ពិនិត្យឈ្មោះ “TRUE Club” រួចចុច Add។ រូបសញ្ញា TRUE នឹងបង្ហាញលើអេក្រង់ដើមរបស់អ្នក។",
+        install_and_1: "ចុចម៉ឺនុយ ⋮ នៅជ្រុងខាងលើស្តាំនៃកម្មវិធីរុករក (Chrome)។",
+        install_and_2: "ចុច “Install app” (ឬ “Add to Home screen”)។",
+        install_and_3: "បញ្ជាក់។ រូបសញ្ញា TRUE Club នឹងបង្ហាញលើអេក្រង់ដើមរបស់អ្នក។",
+        install_done: "✅ បានតំឡើងរួចរាល់! បើក TRUE Club ពីអេក្រង់ដើមរបស់អ្នក។"
       }
     };
 
@@ -2118,6 +2153,80 @@
       renderBulletinBoard();
     }
 
+    /******************************************************************
+     * 9. ADD TO HOME SCREEN (iOS + Android)
+     *    Android/Chrome: one tap opens the native install prompt.
+     *    iOS has no install API, so we show the 3 Safari steps instead.
+     ******************************************************************/
+    const LOGO_URL = 'https://i.postimg.cc/rskLgm5v/TRUE-LOGO.jpg';
+    let deferredInstallPrompt = null;
+
+    const isStandalone = () =>
+      window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone === true;
+    const isIOS = () =>
+      /iphone|ipad|ipod/i.test(navigator.userAgent) ||
+      (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
+
+    window.addEventListener('beforeinstallprompt', (e) => {
+      e.preventDefault();
+      deferredInstallPrompt = e;
+    });
+    window.addEventListener('appinstalled', () => {
+      deferredInstallPrompt = null;
+      updateInstallButton();
+      showToast(t('install_done'));
+    });
+
+    function updateInstallButton() {
+      // Hide the button once the club is already running as an installed app
+      document.getElementById('installBtn').classList.toggle('hidden', isStandalone());
+    }
+
+    async function installApp() {
+      if (deferredInstallPrompt) {
+        const promptEvent = deferredInstallPrompt;
+        deferredInstallPrompt = null; // a prompt event can only be used once
+        promptEvent.prompt();
+        try { await promptEvent.userChoice; } catch (e) {}
+        return;
+      }
+      showInstallHelp();
+    }
+
+    function showInstallHelp() {
+      modalMode = null;
+      const modal = document.getElementById('stationModal');
+      modal.classList.remove('hidden');
+      modal.classList.add('flex');
+      document.getElementById('modalIcon').textContent = '📲';
+      document.getElementById('modalTitle').textContent = t('install_title');
+      const steps = isIOS() ? ['install_ios_1', 'install_ios_2', 'install_ios_3']
+                            : ['install_and_1', 'install_and_2', 'install_and_3'];
+      document.getElementById('modalBody').innerHTML = `
+        <div class="space-y-4">
+          <div class="flex items-center gap-4 bg-trueVoid p-3 border-2 border-trueGreen">
+            <img src="${LOGO_URL}" alt="TRUE Club" class="w-16 h-16 border-2 border-black object-cover" onerror="this.style.display='none'" />
+            <div>
+              <div class="pixel-heading text-sm text-white">TRUE Club</div>
+              <div class="text-xs text-gray-300">${esc(t('install_sub'))}</div>
+            </div>
+          </div>
+          <ol class="space-y-2 text-sm text-gray-100">
+            ${steps.map((k, i) => `
+              <li class="flex gap-3 items-start bg-trueVoid p-3 border-2 border-black">
+                <span class="pixel-heading text-trueGreen text-xs mt-0.5">${i + 1}</span>
+                <span>${esc(t(k))}</span>
+              </li>`).join('')}
+          </ol>
+        </div>`;
+    }
+
+    function registerServiceWorker() {
+      if ('serviceWorker' in navigator && /^https?:$/.test(location.protocol)) {
+        navigator.serviceWorker.register('sw.js').catch(() => {});
+      }
+    }
+
     // Phnom Penh Clock
     setInterval(() => {
       const now = new Date();
@@ -2129,6 +2238,8 @@
     // the Supabase session (if any) then unlocks it.
     window.addEventListener('DOMContentLoaded', async () => {
       updateProfileUI();
+      updateInstallButton();
+      registerServiceWorker();
       gameLoop();
       fetchBulletinPosts();
       fetchLeaderboard();

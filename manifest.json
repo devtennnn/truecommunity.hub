@@ -1,0 +1,16 @@
+{
+  "name": "TRUE Club",
+  "short_name": "TRUE Club",
+  "description": "TRUE Community — walk, chat & play together in the live pixel clubhouse.",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "orientation": "any",
+  "background_color": "#11141a",
+  "theme_color": "#11141a",
+  "lang": "en",
+  "icons": [
+    { "src": "https://i.postimg.cc/rskLgm5v/TRUE-LOGO.jpg", "sizes": "192x192", "type": "image/jpeg", "purpose": "any" },
+    { "src": "https://i.postimg.cc/rskLgm5v/TRUE-LOGO.jpg", "sizes": "512x512", "type": "image/jpeg", "purpose": "any" }
+  ]
+}
