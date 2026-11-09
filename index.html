@@ -1,0 +1,2334 @@
+<!DOCTYPE html>
+<html lang="en" class="dark">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+  <!-- ADD TO HOME SCREEN (iOS + Android): name "TRUE Club" + TRUE logo -->
+  <link rel="manifest" href="manifest.json" />
+  <meta name="theme-color" content="#11141a" />
+  <meta name="application-name" content="TRUE Club" />
+  <meta name="mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-title" content="TRUE Club" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black" />
+  <link rel="apple-touch-icon" href="https://i.postimg.cc/rskLgm5v/TRUE-LOGO.jpg" />
+  <link rel="icon" href="https://i.postimg.cc/rskLgm5v/TRUE-LOGO.jpg" />
+  <title>TRUE Community — Live Multiplayer Pixel Clubhouse</title>
+  <!-- Google Fonts: Press Start 2P, VT323, and Kantumruy Pro (Khmer) -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Kantumruy+Pro:ital,wght@0,400;0,600;0,700;1,400&family=Press+Start+2P&family=VT323&display=swap" rel="stylesheet">
+  <!-- Tailwind CSS -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <!-- Supabase JS SDK v2 -->
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            trueGreen: '#2dce89',
+            trueGreenDark: '#1ea86d',
+            trueSlate: '#394150',
+            trueSlateDark: '#1b2029',
+            trueVoid: '#11141a',
+            discord: '#5865F2',
+            telegram: '#26A5E4',
+            pixelGold: '#fbbf24',
+            pixelCoral: '#ff6b6b',
+            pixelPurple: '#a855f7'
+          },
+          fontFamily: {
+            pixel: ['"Press Start 2P"', '"Kantumruy Pro"', 'monospace'],
+            retro: ['"VT323"', '"Kantumruy Pro"', 'monospace'],
+            khmer: ['"Kantumruy Pro"', 'sans-serif'],
+          }
+        }
+      }
+    }
+  </script>
+
+  <style>
+    :root {
+      --main-green: #2dce89;
+      --main-slate: #394150;
+      --dark-bg: #11141a;
+    }
+
+    * {
+      image-rendering: pixelated;
+      box-sizing: border-box;
+    }
+
+    body {
+      background-color: var(--dark-bg);
+      color: #f3f4f6;
+      font-family: 'VT323', 'Kantumruy Pro', monospace;
+      overflow-x: hidden;
+      background-image: 
+        radial-gradient(rgba(45, 206, 137, 0.1) 1px, transparent 1px),
+        linear-gradient(to right, rgba(57, 65, 80, 0.14) 1px, transparent 1px),
+        linear-gradient(to bottom, rgba(57, 65, 80, 0.14) 1px, transparent 1px);
+      background-size: 24px 24px, 48px 48px, 48px 48px;
+    }
+
+    body.lang-kh {
+      font-family: 'Kantumruy Pro', sans-serif !important;
+      line-height: 1.65;
+    }
+    body.lang-kh .pixel-heading {
+      font-family: 'Kantumruy Pro', sans-serif !important;
+      font-weight: 700;
+      letter-spacing: 0.01em;
+    }
+    body.lang-en .pixel-heading {
+      font-family: 'Press Start 2P', monospace;
+      line-height: 1.45;
+    }
+
+    .crt-overlay {
+      pointer-events: none;
+      position: fixed;
+      inset: 0;
+      background: linear-gradient(rgba(18, 16, 16, 0) 50%, rgba(0, 0, 0, 0.18) 50%);
+      background-size: 100% 4px;
+      z-index: 90;
+      opacity: 0.4;
+    }
+
+    .pixel-window {
+      background: #394150;
+      border: 4px solid #0b0d12;
+      box-shadow: 
+        inset -4px -4px 0px 0px #252b37,
+        inset 4px 4px 0px 0px #525d72,
+        6px 6px 0px 0px #0b0d12;
+    }
+
+    .pixel-window-dark {
+      background: #1b2029;
+      border: 4px solid #0b0d12;
+      box-shadow: 
+        inset -4px -4px 0px 0px #12161d,
+        inset 4px 4px 0px 0px #2b3240,
+        6px 6px 0px 0px #0b0d12;
+    }
+
+    .pixel-window-green {
+      background: #1b2029;
+      border: 4px solid #2dce89;
+      box-shadow: 6px 6px 0px 0px #0b0d12;
+    }
+
+    .pixel-btn {
+      position: relative;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      border: 3px solid #0b0d12;
+      box-shadow: 
+        inset -3px -3px 0px 0px rgba(0,0,0,0.35),
+        inset 3px 3px 0px 0px rgba(255,255,255,0.25),
+        4px 4px 0px 0px #0b0d12;
+      transition: transform 0.08s ease, box-shadow 0.08s ease;
+      cursor: pointer;
+      user-select: none;
+    }
+    .pixel-btn:hover {
+      transform: translate(-1px, -1px);
+      box-shadow: 
+        inset -3px -3px 0px 0px rgba(0,0,0,0.35),
+        inset 3px 3px 0px 0px rgba(255,255,255,0.25),
+        5px 5px 0px 0px #0b0d12;
+    }
+    .pixel-btn:active {
+      transform: translate(3px, 3px);
+      box-shadow: 1px 1px 0px 0px #0b0d12;
+    }
+
+    .coin-disc {
+      width: 96px; height: 96px; border-radius: 50%; margin: 0 auto;
+      background: #fbbf24; border: 5px solid #b45309;
+      box-shadow: inset -6px -6px 0 rgba(0,0,0,.25), inset 6px 6px 0 rgba(255,255,255,.35), 4px 4px 0 #0b0d12;
+      display: flex; align-items: center; justify-content: center; font-size: 42px;
+    }
+    .coin-disc.spinning { animation: coinspin .7s linear infinite; }
+    @keyframes coinspin { from { transform: rotateY(0deg); } to { transform: rotateY(360deg); } }
+    .slot-reel {
+      width: 76px; height: 84px; background: #0b0d12; border: 4px solid #2dce89;
+      box-shadow: inset 0 0 0 3px #1b2029, 4px 4px 0 #0b0d12;
+      display: flex; align-items: center; justify-content: center; font-size: 40px;
+    }
+    .slot-reel.spinning { filter: blur(1.2px); border-color: #fbbf24; }
+    .is-locked { opacity: .55; filter: grayscale(.5); }
+    .is-locked, [data-auth-input][readonly] { cursor: not-allowed; }
+
+    #clubhouseCanvas {
+      display: block;
+      width: 100%;
+      height: auto;
+      cursor: crosshair;
+      background: #161a22;
+    }
+  </style>
+</head>
+<body class="lang-en min-h-screen flex flex-col selection:bg-trueGreen selection:text-trueVoid">
+
+  <!-- CRT Scanline Overlay -->
+  <div class="crt-overlay"></div>
+
+  <!-- 1. TOP RETRO OS STATUS BAR -->
+  <div class="bg-trueVoid border-b-2 border-trueSlate text-xs py-1.5 px-4 flex flex-wrap items-center justify-between gap-2 z-40">
+    <div class="flex items-center gap-3">
+      <span id="dbStatusBadge" class="inline-flex items-center gap-1.5 text-trueGreen font-bold">
+        <span class="w-2 h-2 bg-trueGreen inline-block animate-ping"></span>
+        <span>CONNECTING SUPABASE...</span>
+      </span>
+      <span class="bg-trueSlateDark border border-trueGreen/50 text-trueGreen px-2 py-0.5 font-bold">
+        🟢 <span id="onlineCountLabel">1</span> <span data-i18n="hud_online">IN ROOM</span>
+      </span>
+    </div>
+
+    <div class="flex items-center gap-4">
+      <button onclick="toggleLofiAudio()" id="topLofiBtn" class="text-xs px-2 py-0.5 bg-trueSlateDark border border-trueGreen text-trueGreen font-bold hover:bg-trueGreen hover:text-trueVoid transition">
+        🎵 LO-FI: OFF
+      </button>
+      <span class="text-pixelGold font-bold text-sm">🪙 <span data-i18n="hud_my_best">COINS:</span> <span id="topBarBestScore">0</span></span>
+      <span id="phnomPenhClock" class="text-gray-300 font-mono">ICT --:--:--</span>
+    </div>
+  </div>
+
+  <!-- 2. STICKY NAVIGATION & DISCORD AUTH HEADER -->
+  <header class="sticky top-0 z-40 bg-trueSlateDark/95 backdrop-blur-sm border-b-4 border-black px-4 py-3">
+    <div class="max-w-7xl mx-auto flex flex-wrap items-center justify-between gap-3">
+      <!-- Brand Logo -->
+      <a href="#" class="flex items-center gap-3 group">
+        <div class="w-11 h-11 bg-trueGreen border-3 border-black flex items-center justify-center shadow-[3px_3px_0_#000] group-hover:rotate-6 transition-transform">
+          <svg class="w-7 h-7" viewBox="0 0 8 8" fill="#11141a">
+            <path d="M1 1h6v2H5v4H3V3H1V1z"/>
+          </svg>
+        </div>
+        <div>
+          <div class="flex items-center gap-2">
+            <span class="pixel-heading text-base md:text-lg text-white tracking-wider">TRUE</span>
+            <span class="bg-trueGreen text-trueVoid font-bold px-1.5 py-0.5 text-xs border border-black">COMMUNITY</span>
+          </div>
+          <p class="text-xs text-gray-300" data-i18n="nav_sub">Game • Chill Talk • Music • Tips</p>
+        </div>
+      </a>
+
+      <!-- Center Quick Nav -->
+      <nav class="hidden lg:flex items-center gap-2">
+        <a href="#world-section" class="px-3 py-1.5 text-base font-bold text-trueGreen bg-trueVoid/70 border-2 border-trueGreen hover:bg-trueGreen hover:text-trueVoid transition">
+          🕹️ <span data-i18n="nav_world">2D Clubhouse</span>
+        </a>
+        <a href="#leaderboard-section" class="px-3 py-1.5 text-base font-bold text-gray-200 hover:text-trueGreen border-2 border-transparent hover:border-trueGreen/50 transition">
+          🏆 <span data-i18n="nav_leaderboard">Leaderboard</span>
+        </a>
+        <a href="#board-section" class="px-3 py-1.5 text-base font-bold text-gray-200 hover:text-trueGreen border-2 border-transparent hover:border-trueGreen/50 transition">
+          📌 <span data-i18n="nav_board">Community Wall</span>
+        </a>
+      </nav>
+
+      <!-- Right Controls: Discord Login + EN / KH Switch -->
+      <div class="flex items-center gap-2.5">
+        <button id="discordLoginBtn" onclick="loginWithDiscord()" class="pixel-btn bg-discord hover:bg-[#4752c4] text-white px-3.5 py-1.5 text-sm font-bold flex items-center gap-2">
+          <svg class="w-4 h-4 fill-current" viewBox="0 0 24 24"><path d="M20.317 4.37a19.791 19.791 0 0 0-4.885-1.515.074.074 0 0 0-.079.037c-.21.375-.444.864-.608 1.25a18.27 18.27 0 0 0-5.487 0 12.64 12.64 0 0 0-.617-1.25.077.077 0 0 0-.079-.037A19.736 19.736 0 0 0 3.677 4.37a.07.07 0 0 0-.032.027C.533 9.046-.32 13.58.099 18.057a.082.082 0 0 0 .031.057 19.9 19.9 0 0 0 5.993 3.03.078.078 0 0 0 .084-.028c.462-.63.874-1.295 1.226-1.994.021-.041.001-.09-.041-.106a13.107 13.107 0 0 1-1.872-.892.077.077 0 0 1-.008-.128 10.2 10.2 0 0 0 .372-.292.074.074 0 0 1 .077-.01c3.928 1.793 8.18 1.793 12.061 0a.074.074 0 0 1 .078.01c.12.098.246.198.373.292a.077.077 0 0 1-.006.127 12.299 12.299 0 0 1-1.873.892.077.077 0 0 0-.041.107c.36.698.772 1.362 1.225 1.993a.076.076 0 0 0 .084.028 19.839 19.839 0 0 0 6.002-3.03.077.077 0 0 0 .032-.054c.5-5.177-.838-9.674-3.549-13.66a.061.061 0 0 0-.031-.028z"/></svg>
+          <span data-i18n="btn_discord_login">Login with Discord</span>
+        </button>
+
+        <div id="userProfileBar" class="hidden items-center gap-2 bg-trueVoid border-2 border-trueGreen px-2.5 py-1">
+          <img id="userAvatarImg" src="" alt="Avatar" class="w-7 h-7 rounded-none border border-trueGreen object-cover" />
+          <div class="text-xs leading-tight">
+            <div id="userNameLabel" class="font-bold text-white">Member</div>
+            <div class="text-trueGreen font-bold">🪙 <span id="userScoreLabel">0</span></div>
+          </div>
+          <button onclick="logoutUser()" class="ml-2 text-xs text-gray-400 hover:text-pixelCoral px-1.5 py-0.5 border border-gray-700" title="Logout">✕</button>
+        </div>
+
+        <button id="installBtn" onclick="installApp()" class="pixel-btn bg-trueSlate hover:bg-trueGreen hover:text-trueVoid text-white px-2.5 py-1.5 text-xs font-bold flex items-center gap-1.5">
+          <span>📲</span><span data-i18n="btn_install">Install App</span>
+        </button>
+
+        <div class="flex bg-trueVoid p-1 border-2 border-black">
+          <button id="btnLangEN" onclick="setLanguage('en')" class="px-2.5 py-1 text-xs font-bold bg-trueGreen text-trueVoid transition">
+            EN
+          </button>
+          <button id="btnLangKH" onclick="setLanguage('kh')" class="px-2.5 py-1 text-xs font-bold text-gray-300 hover:text-white transition font-khmer">
+            ខ្មែរ
+          </button>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <!-- GUEST NOTICE (hidden automatically once logged in with Discord) -->
+  <div id="guestBanner" class="bg-trueSlate border-b-2 border-pixelGold/70 px-4 py-2 text-sm">
+    <div class="max-w-7xl mx-auto flex flex-wrap items-center justify-between gap-2">
+      <span class="text-pixelGold font-bold">👀 <span data-i18n="guest_banner">You are browsing as a Guest. Login with Discord to chat, play the arcade, post, like and save your score.</span></span>
+      <button onclick="loginWithDiscord()" class="pixel-btn bg-discord text-white font-bold px-3 py-1 text-xs" data-i18n="btn_discord_login">Login with Discord</button>
+    </div>
+  </div>
+
+  <!-- MAIN CONTENT -->
+  <main class="flex-grow">
+
+    <!-- 3. INTERACTIVE 2D WALKABLE PIXEL CLUBHOUSE + SIDEBAR LEADERBOARD -->
+    <section id="world-section" class="max-w-7xl mx-auto px-4 pt-6 pb-10">
+      
+      <!-- Top Title Banner -->
+      <div class="flex flex-col lg:flex-row lg:items-end justify-between mb-5 gap-4">
+        <div>
+          <div class="inline-flex items-center gap-2 bg-trueSlate border-2 border-trueGreen px-3 py-1 text-xs text-trueGreen font-bold mb-2">
+            <span>🟢 MULTIPLAYER REALTIME</span>
+            <span>•</span>
+            <span data-i18n="hero_badge">WALK, CHAT & PLAY TOGETHER</span>
+          </div>
+          <h1 class="pixel-heading text-xl sm:text-2xl md:text-3xl text-white">
+            <span data-i18n="hero_title_1">WELCOME TO</span> 
+            <span class="text-trueGreen">TRUE CLUBHOUSE</span>
+          </h1>
+        </div>
+
+        <div class="flex flex-wrap items-center gap-2">
+          <button onclick="openStationModal('arcade')" class="pixel-btn bg-trueGreen text-trueVoid font-bold px-4 py-2 text-sm">
+            🪙 <span data-i18n="btn_play_arcade">Coin Arcade: Flip & Slots</span>
+          </button>
+          <button onclick="openStationModal('rewards')" class="pixel-btn bg-pixelGold text-trueVoid font-bold px-3.5 py-2 text-sm">
+            🎁 <span data-i18n="btn_rewards">Daily Rewards</span><span id="rewardsBadge" class="hidden ml-1.5 bg-pixelCoral text-white text-[10px] px-1.5 border border-black">0</span>
+          </button>
+          <button onclick="openStationModal('jukebox')" class="pixel-btn bg-pixelPurple text-white font-bold px-3.5 py-2 text-sm">
+            🎵 <span data-i18n="btn_jukebox">Lo-Fi Jukebox</span>
+          </button>
+          <button onclick="syncProfileToDatabase(true)" class="pixel-btn bg-trueSlate text-white font-bold px-3 py-2 text-sm auth-only">
+            💾 <span data-i18n="btn_save_profile">Sync Profile</span>
+          </button>
+        </div>
+      </div>
+
+      <!-- 2D ROOM + CHARACTER CUSTOMIZER & LIVE LEADERBOARD GRID -->
+      <div class="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
+        
+        <!-- LEFT 8 COLS: WALKABLE 2D PIXEL ROOM -->
+        <div class="lg:col-span-8 pixel-window p-1.5 bg-trueSlate">
+          <div class="bg-trueVoid px-3 py-2 border-b-4 border-black flex flex-wrap items-center justify-between gap-2">
+            <div class="flex items-center gap-2">
+              <span class="w-3 h-3 bg-pixelCoral inline-block border border-black"></span>
+              <span class="w-3 h-3 bg-pixelGold inline-block border border-black"></span>
+              <span class="w-3 h-3 bg-trueGreen inline-block border border-black"></span>
+              <span class="text-xs sm:text-sm font-bold text-trueGreen ml-1 tracking-wide">TRUE_CLUBHOUSE_MULTIPLAYER.EXE</span>
+            </div>
+            <div class="text-xs text-gray-300">
+              <span data-i18n="map_hint">Click/Tap floor or use WASD / Arrows to walk to any station</span>
+            </div>
+          </div>
+
+          <!-- Canvas Wrapper -->
+          <div class="relative bg-[#141820] overflow-hidden">
+            <canvas id="clubhouseCanvas" width="820" height="460"></canvas>
+
+            <!-- Floating Station Action Prompt -->
+            <div id="stationPrompt" class="hidden absolute bottom-3 left-1/2 -translate-x-1/2 bg-trueVoid/95 border-2 border-trueGreen px-4 py-2 shadow-[4px_4px_0_#000] flex items-center gap-3 z-20">
+              <span id="stationPromptText" class="text-sm sm:text-base font-bold text-white">Near Station</span>
+              <button id="stationPromptBtn" class="pixel-btn bg-trueGreen text-trueVoid font-bold px-3 py-1 text-xs sm:text-sm">
+                OPEN [SPACE]
+              </button>
+            </div>
+          </div>
+
+          <!-- Bottom Room Controls: Avatar Role, Chat Bubble & Emotes -->
+          <div class="bg-trueSlateDark p-3 border-t-4 border-black flex flex-wrap items-center justify-between gap-3">
+            <div class="flex flex-wrap items-center gap-2 flex-grow">
+              <span class="text-xs uppercase font-bold text-trueGreen" data-i18n="lbl_role">PIXEL ROLE:</span>
+              <button onclick="cycleRole()" id="roleCycleBtn" class="pixel-btn bg-trueSlate text-white px-3 py-1 text-xs font-bold auth-only">
+                🎮 Gamer
+              </button>
+
+              <div class="flex items-center gap-1 flex-grow max-w-xs">
+                <input id="roomChatInput" data-auth-input="chat" type="text" maxlength="42" placeholder="Chat live with the room..." 
+                  class="bg-trueVoid border-2 border-black px-2.5 py-1 text-sm text-white w-full focus:outline-none focus:border-trueGreen"
+                  onkeydown="if(event.key==='Enter') sendRoomChat()" />
+                <button onclick="sendRoomChat()" class="pixel-btn bg-trueGreen text-trueVoid font-bold px-3 py-1 text-xs auth-only" data-i18n="btn_say">
+                  SAY
+                </button>
+              </div>
+            </div>
+
+            <div class="flex items-center gap-1.5">
+              <button onclick="triggerPlayerEmote('💚')" class="pixel-btn bg-trueVoid px-2 py-1 text-sm auth-only">💚</button>
+              <button onclick="triggerPlayerEmote('☕')" class="pixel-btn bg-trueVoid px-2 py-1 text-sm auth-only">☕</button>
+              <button onclick="triggerPlayerEmote('🎮')" class="pixel-btn bg-trueVoid px-2 py-1 text-sm auth-only">🎮</button>
+              <button onclick="triggerPlayerEmote('🎵')" class="pixel-btn bg-trueVoid px-2 py-1 text-sm auth-only">🎵</button>
+              <button onclick="triggerPlayerEmote('🔥')" class="pixel-btn bg-trueVoid px-2 py-1 text-sm auth-only">🔥</button>
+            </div>
+          </div>
+        </div>
+
+        <!-- RIGHT 4 COLS: DISCORD PROFILE CARD & LIVE LEADERBOARD -->
+        <div id="leaderboard-section" class="lg:col-span-4 space-y-5">
+          
+          <!-- Member Card -->
+          <div class="pixel-window-green p-4">
+            <div class="flex items-center justify-between border-b-2 border-gray-800 pb-3 mb-3">
+              <div class="flex items-center gap-3">
+                <div class="relative">
+                  <img id="cardAvatarImg" src="https://api.dicebear.com/7.x/pixel-art/svg?seed=TruePlayer" alt="Avatar" class="w-12 h-12 border-2 border-trueGreen bg-trueSlateDark" />
+                  <span id="authStatusDot" class="w-3 h-3 bg-trueGreen border border-black absolute -bottom-1 -right-1"></span>
+                </div>
+                <div>
+                  <div class="flex items-center gap-1.5">
+                    <h3 id="cardUsername" class="font-bold text-lg text-white">Guest_Player</h3>
+                    <span id="discordVerifiedBadge" class="hidden bg-discord text-white text-[10px] px-1.5 py-0.5 font-bold">DISCORD</span>
+                  </div>
+                  <p id="cardRoleLabel" class="text-xs text-trueGreen font-bold">🎮 Role: Gamer</p>
+                </div>
+              </div>
+              <div class="text-right">
+                <div class="text-xs text-gray-400" data-i18n="lbl_best_score">COINS</div>
+                <div id="cardHighScore" class="pixel-heading text-lg text-pixelGold">0</div>
+              </div>
+            </div>
+
+            <div class="space-y-2">
+              <div class="flex gap-2">
+                <input id="customNameInput" data-auth-input="name" type="text" maxlength="16" placeholder="Set custom nickname..." 
+                  class="bg-trueVoid border-2 border-black px-2.5 py-1 text-sm text-white flex-grow focus:outline-none focus:border-trueGreen"
+                  onkeydown="if(event.key==='Enter') updateCustomNickname()" />
+                <button onclick="updateCustomNickname()" class="pixel-btn bg-trueGreen text-trueVoid px-3 py-1 text-xs font-bold auth-only" data-i18n="btn_set_name">
+                  Save
+                </button>
+              </div>
+              <p id="syncFeedbackText" class="text-xs text-pixelGold font-bold">
+                Connected to Supabase. Your score, role & live movement sync in real time!
+              </p>
+            </div>
+          </div>
+
+          <!-- Global High Score Leaderboard -->
+          <div class="pixel-window p-4">
+            <div class="flex items-center justify-between mb-3 pb-2 border-b-2 border-trueSlateDark">
+              <div class="flex items-center gap-2">
+                <span class="text-lg">🏆</span>
+                <h2 class="pixel-heading text-xs sm:text-sm text-white" data-i18n="leader_title">RICHEST PLAYERS</h2>
+              </div>
+              <button onclick="fetchLeaderboard()" class="text-xs text-trueGreen hover:underline font-bold" data-i18n="btn_refresh">
+                ↻ Refresh
+              </button>
+            </div>
+
+            <div id="leaderboardList" class="space-y-2 max-h-64 overflow-y-auto pr-1"></div>
+
+            <div class="mt-3 pt-2 border-t border-trueSlateDark flex items-center justify-between text-xs text-gray-300">
+              <span data-i18n="leader_footer">Win coins in the Arcade to climb ranks!</span>
+              <button onclick="openStationModal('arcade')" class="text-trueGreen font-bold hover:underline">▶ Play Now</button>
+            </div>
+          </div>
+
+        </div>
+      </div>
+    </section>
+
+    <!-- 4. COMMUNITY BULLETIN WALL (SAVED IN SUPABASE POSTS TABLE) -->
+    <section id="board-section" class="max-w-7xl mx-auto px-4 py-10 border-t-4 border-black">
+      <div class="flex flex-col md:flex-row md:items-end justify-between mb-6 gap-4">
+        <div>
+          <div class="text-xs font-bold text-trueGreen uppercase tracking-widest mb-1" data-i18n="board_eyebrow">
+            SHARED SUPABASE BULLETIN BOARD
+          </div>
+          <h2 class="pixel-heading text-lg md:text-2xl text-white" data-i18n="board_title">
+            COMMUNITY TIPS, MUSIC & LFG WALL
+          </h2>
+        </div>
+
+        <div class="flex flex-wrap gap-2">
+          <button onclick="filterBoard('all')" data-filter="all" class="board-tab pixel-btn bg-trueGreen text-trueVoid font-bold px-3 py-1.5 text-xs">
+            ✨ <span data-i18n="filter_all">All</span>
+          </button>
+          <button onclick="filterBoard('game')" data-filter="game" class="board-tab pixel-btn bg-trueSlate text-white font-bold px-3 py-1.5 text-xs">
+            🎮 <span data-i18n="filter_game">Gaming</span>
+          </button>
+          <button onclick="filterBoard('music')" data-filter="music" class="board-tab pixel-btn bg-trueSlate text-white font-bold px-3 py-1.5 text-xs">
+            🎵 <span data-i18n="filter_music">Music</span>
+          </button>
+          <button onclick="filterBoard('tips')" data-filter="tips" class="board-tab pixel-btn bg-trueSlate text-white font-bold px-3 py-1.5 text-xs">
+            💡 <span data-i18n="filter_tips">Tips & Trade</span>
+          </button>
+          <button onclick="filterBoard('chill')" data-filter="chill" class="board-tab pixel-btn bg-trueSlate text-white font-bold px-3 py-1.5 text-xs">
+            ☕ <span data-i18n="filter_chill">Chill</span>
+          </button>
+        </div>
+      </div>
+
+      <!-- Post Creator Bar -->
+      <div class="pixel-window-dark p-4 mb-6 border-2 border-trueGreen/60">
+        <div class="grid grid-cols-1 md:grid-cols-12 gap-3 items-center">
+          <div class="md:col-span-3">
+            <select id="postCategoryInput" class="w-full bg-trueVoid border-2 border-black px-3 py-2 text-white text-sm focus:outline-none focus:border-trueGreen">
+              <option value="game">🎮 Gaming / LFG</option>
+              <option value="music">🎵 Music / Track Share</option>
+              <option value="tips">💡 Casual Tip / Market</option>
+              <option value="chill">☕ Chill / Meetup</option>
+            </select>
+          </div>
+          <div class="md:col-span-7">
+            <input id="postMessageInput" data-auth-input="post" type="text" maxlength="140" placeholder="Share a game invite, lo-fi track, or helpful tip with TRUE Community..." 
+              class="w-full bg-trueVoid border-2 border-black px-3 py-2 text-white text-sm focus:outline-none focus:border-trueGreen"
+              onkeydown="if(event.key==='Enter') submitBoardPost()" />
+          </div>
+          <div class="md:col-span-2">
+            <button onclick="submitBoardPost()" class="w-full pixel-btn bg-trueGreen text-trueVoid font-bold py-2 px-3 text-xs sm:text-sm auth-only">
+              📌 <span data-i18n="btn_pin">PIN POST</span>
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Bulletin Grid -->
+      <div id="bulletinGrid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5"></div>
+    </section>
+
+    <!-- 5. DISCORD & TELEGRAM PORTALS -->
+    <section class="max-w-7xl mx-auto px-4 py-10 border-t-4 border-black">
+      <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+        <div class="pixel-window p-6 relative overflow-hidden">
+          <div class="h-2 bg-discord absolute top-0 inset-x-0"></div>
+          <div class="flex items-center justify-between mb-4 mt-1">
+            <h3 class="pixel-heading text-base sm:text-lg text-white">DISCORD SERVER</h3>
+            <span class="bg-trueVoid text-trueGreen text-xs font-bold px-2.5 py-1 border border-trueGreen">VOICE & SQUADS</span>
+          </div>
+          <p class="text-gray-200 mb-5 text-base" data-i18n="discord_desc">
+            Jump into our voice lounges for late-night gaming, Lo-Fi music bots, and casual screen-sharing with friends.
+          </p>
+          <a href="https://discord.com" target="_blank" rel="noopener noreferrer" class="pixel-btn bg-discord text-white font-bold px-5 py-2.5 text-sm inline-flex items-center gap-2">
+            <span data-i18n="btn_open_discord">Join TRUE Discord</span> ➔
+          </a>
+        </div>
+
+        <div class="pixel-window p-6 relative overflow-hidden">
+          <div class="h-2 bg-telegram absolute top-0 inset-x-0"></div>
+          <div class="flex items-center justify-between mb-4 mt-1">
+            <h3 class="pixel-heading text-base sm:text-lg text-white">TELEGRAM GROUP</h3>
+            <span class="bg-trueVoid text-telegram text-xs font-bold px-2.5 py-1 border border-telegram">FAST CHAT & MEETUPS</span>
+          </div>
+          <p class="text-gray-200 mb-5 text-base" data-i18n="telegram_desc">
+            Daily group banter, stickers, Phnom Penh coffee meetup polls, and helpful community tips on the go.
+          </p>
+          <a href="https://telegram.org" target="_blank" rel="noopener noreferrer" class="pixel-btn bg-telegram text-white font-bold px-5 py-2.5 text-sm inline-flex items-center gap-2">
+            <span data-i18n="btn_open_telegram">Join TRUE Telegram</span> ➔
+          </a>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <!-- 6. STATION & ARCADE MINI-GAME MODAL -->
+  <div id="stationModal" class="fixed inset-0 bg-black/80 backdrop-blur-xs z-50 hidden items-center justify-center p-4">
+    <div class="pixel-window max-w-xl w-full bg-trueSlate overflow-hidden">
+      <div class="bg-trueVoid px-4 py-2.5 border-b-4 border-black flex items-center justify-between">
+        <div class="flex items-center gap-2">
+          <span id="modalIcon" class="text-lg">🕹️</span>
+          <h3 id="modalTitle" class="pixel-heading text-xs sm:text-sm text-trueGreen">TRUE ARCADE CABINET</h3>
+        </div>
+        <button onclick="closeStationModal()" class="pixel-btn bg-pixelCoral text-trueVoid font-bold px-2.5 py-0.5 text-xs">ESC / ✕</button>
+      </div>
+      <div id="modalBody" class="p-5 max-h-[80vh] overflow-y-auto"></div>
+    </div>
+  </div>
+
+  <!-- TOAST (login-required & error messages) -->
+  <div id="toast" role="status" class="hidden fixed bottom-5 right-4 left-4 sm:left-auto sm:max-w-sm z-[60] pixel-window-dark p-3 items-center gap-3 border-pixelGold">
+    <span id="toastText" class="text-sm text-white flex-grow"></span>
+    <button id="toastLoginBtn" onclick="hideToast(); loginWithDiscord()" class="hidden pixel-btn bg-discord text-white font-bold px-2.5 py-1 text-xs whitespace-nowrap">Discord</button>
+    <button onclick="hideToast()" class="text-gray-400 hover:text-white text-xs px-1" aria-label="Close">✕</button>
+  </div>
+
+  <!-- FOOTER -->
+  <footer class="bg-trueVoid border-t-4 border-black py-6 px-4 text-center text-xs text-gray-400">
+    <p>© 2026 <span class="text-trueGreen font-bold">TRUE COMMUNITY</span> — Colors: #2dce89 & #394150 • Kantumruy Pro (KH) • Powered by Supabase Realtime.</p>
+  </footer>
+
+  <!-- ================================================================= -->
+  <!-- SUPABASE + REALTIME MULTIPLAYER + MINI-GAME + LO-FI SCRIPT        -->
+  <!-- ================================================================= -->
+  <script>
+    /******************************************************************
+     * 1. YOUR LIVE SUPABASE CREDENTIALS
+     ******************************************************************/
+    const SUPABASE_CONFIG = {
+      url: "https://igpbjgxtgxhaspuwbssb.supabase.co",
+      anonKey: "sb_publishable_HbFQHz5wgCJubYHyZvtazw_YjQRxkh8"
+    };
+
+    let supabaseClient = null;
+    let isSupabaseConnected = false;
+
+    try {
+      supabaseClient = window.supabase.createClient(SUPABASE_CONFIG.url, SUPABASE_CONFIG.anonKey);
+      isSupabaseConnected = true;
+    } catch (err) {
+      console.warn("Supabase client init warning:", err);
+    }
+
+    function setDbStatusUI(status, message) {
+      const badge = document.getElementById('dbStatusBadge');
+      if (status === 'live') {
+        badge.className = "inline-flex items-center gap-1.5 text-trueGreen font-bold";
+        badge.innerHTML = `<span class="w-2 h-2 bg-trueGreen inline-block animate-ping"></span><span>${message}</span>`;
+      } else {
+        badge.className = "inline-flex items-center gap-1.5 text-amber-400 font-bold";
+        badge.innerHTML = `<span class="w-2 h-2 bg-amber-400 inline-block"></span><span>${message}</span>`;
+      }
+    }
+
+    /******************************************************************
+     * 2. BILINGUAL DICTIONARY (EN / KH KANTUMRUY PRO)
+     ******************************************************************/
+    let currentLang = 'en';
+    const i18n = {
+      en: {
+        hud_online: "IN ROOM",
+        hud_my_best: "COINS:",
+        nav_sub: "Game • Chill Talk • Music • Tips",
+        nav_world: "2D Clubhouse",
+        nav_leaderboard: "Leaderboard",
+        nav_board: "Community Wall",
+        btn_discord_login: "Login with Discord",
+        hero_badge: "WALK, CHAT & PLAY TOGETHER",
+        hero_title_1: "WELCOME TO",
+        btn_play_arcade: "Coin Arcade: Flip & Slots",
+        btn_jukebox: "Lo-Fi Jukebox",
+        btn_save_profile: "Sync Profile",
+        map_hint: "Click/Tap floor or use WASD / Arrows to walk to any station",
+        lbl_role: "PIXEL ROLE:",
+        btn_say: "SAY",
+        lbl_best_score: "COINS",
+        btn_set_name: "Save",
+        sync_hint: "Connected to Supabase. Your score, role & live movement sync in real time!",
+        leader_title: "RICHEST PLAYERS",
+        btn_refresh: "↻ Refresh",
+        leader_footer: "Win coins in the Arcade to climb ranks!",
+        board_eyebrow: "SHARED SUPABASE BULLETIN BOARD",
+        board_title: "COMMUNITY TIPS, MUSIC & LFG WALL",
+        filter_all: "All",
+        filter_game: "Gaming",
+        filter_music: "Music",
+        filter_tips: "Tips & Trade",
+        filter_chill: "Chill",
+        btn_pin: "PIN POST",
+        discord_desc: "Jump into our voice lounges for late-night gaming, Lo-Fi music bots, and casual screen-sharing with friends.",
+        btn_open_discord: "Join TRUE Discord",
+        telegram_desc: "Daily group banter, stickers, Phnom Penh coffee meetup polls, and helpful community tips on the go.",
+        btn_open_telegram: "Join TRUE Telegram",
+        sync_hint_guest: "Guest mode: login with Discord to earn coins, save your profile and post.",
+        guest_name: "Guest",
+        guest_role: "👀 Viewing only",
+        guest_banner: "You are browsing as a Guest. Login with Discord to chat, play the coin arcade, claim daily coins, post and like.",
+        chat_placeholder: "Chat live with the room...",
+        chat_locked: "🔒 Login with Discord to chat",
+        name_placeholder: "Set custom nickname...",
+        name_locked: "🔒 Login to set a nickname",
+        post_placeholder: "Share a game invite, lo-fi track, or helpful tip with TRUE Community...",
+        post_locked: "🔒 Login with Discord to post on the wall",
+        need_login: "Please login with Discord first.",
+        need_login_chat: "🔒 Login with Discord to chat and send emotes.",
+        need_login_arcade: "🔒 Login with Discord to use coins and play the arcade.",
+        need_login_post: "🔒 Login with Discord to post on the wall.",
+        need_login_like: "🔒 Login with Discord to like posts.",
+        need_login_profile: "🔒 Login with Discord to edit and save your profile.",
+        arcade_gate_title: "ARCADE LOCKED",
+        arcade_gate_body: "Only Discord members can claim coins and play Flip Coin & Slots, so your coins can be saved safely. Login to start!",
+
+        popup_title: "WELCOME TO TRUE CLUB",
+        popup_heading: "Join Our Pixel Community!",
+        popup_desc: "Hang out, play games, listen to Lo-Fi beats, and share tips in our Discord server and Telegram group!",
+        popup_auto_close: "Auto-closing in ",
+        popup_stay: "Stay & Explore",
+        login_failed: "Discord login failed:",
+        server_offline: "Cannot reach the server right now. Please try again later.",
+        save_failed: "Could not save to the database. Please try again.",
+        post_failed: "Could not publish your post. Please try again.",
+        like_failed: "Could not save your like. Please try again.",
+        btn_rewards: "Daily Rewards",
+        arcade_title: "TRUE COIN ARCADE",
+        wallet_label: "MY COINS",
+        tab_flip: "Flip Coin",
+        tab_slots: "Slots",
+        tab_tasks: "Rewards",
+        task_daily: "Daily bonus",
+        task_login: "Login today",
+        task_share: "Share TRUE Community",
+        task_chat: "Chat in the room",
+        task_claim: "CLAIM",
+        task_claimed: "Claimed",
+        task_pending: "Not done yet",
+        task_share_btn: "Share now",
+        task_go_chat: "Go chat",
+        tasks_hint: "Finish a task, then press CLAIM. Everything resets every day at 00:00 (Phnom Penh time). Up to 100 coins a day.",
+        not_enough: "Not enough coins — claim your daily rewards first!",
+        you_won: "You won",
+        you_lost: "You lost",
+        coin_error: "Something went wrong. Please try again.",
+        coin_setup: "Coin system is not set up yet (run supabase_coins.sql in Supabase).",
+        link_copied: "Link copied! Paste it to share with friends.",
+        share_text: "Come hang out in TRUE Community — walk, chat & play together!",
+        heads: "Heads",
+        tails: "Tails",
+        bet_label: "BET:",
+        flip_intro: "Pick a side and flip!",
+        flip_rules: "50/50 chance. A win pays +90% of your bet.",
+        slots_intro: "Press SPIN!",
+        spin_btn: "SPIN",
+        slots_paytable: "3 same: 🍒×4 🍋×6 🔔×10 💎×20 7️⃣×50 · Any pair: bet returned",
+        slot_triple: "JACKPOT! You won",
+        slot_pair: "A pair! Your bet is returned",
+        btn_install: "Install App",
+        install_title: "ADD TRUE CLUB TO HOME SCREEN",
+        install_sub: "Open TRUE Community like a real app, full screen.",
+        install_ios_1: "Open this page in Safari, then tap the Share button (the square with an arrow ⬆️) at the bottom of the screen.",
+        install_ios_2: "Scroll down and tap “Add to Home Screen”.",
+        install_ios_3: "Check the name “TRUE Club” and tap Add. The TRUE logo appears on your home screen.",
+        install_and_1: "Tap the ⋮ menu at the top right of your browser (Chrome).",
+        install_and_2: "Tap “Install app” (or “Add to Home screen”).",
+        install_and_3: "Confirm. The TRUE Club icon appears on your home screen.",
+        install_done: "✅ Installed! Open TRUE Club from your home screen."
+      },
+      kh: {
+        hud_online: "នាក់ក្នុងបន្ទប់",
+        hud_my_best: "កាក់:",
+        nav_sub: "លេងហ្គេម • ជជែកកម្សាន្ត • តន្ត្រី • ចែករំលែកគន្លឹះ",
+        nav_world: "បន្ទប់ 2D ភីកសែល",
+        nav_leaderboard: "តារាងពិន្ទុ",
+        nav_board: "ក្តារសហគមន៍",
+        btn_discord_login: "ចូលដោយប្រើ Discord",
+        hero_badge: "ដើរ ជជែក និងលេងហ្គេមជុំគ្នាផ្ទាល់",
+        hero_title_1: "សូមស្វាគមន៍មកកាន់",
+        btn_play_arcade: "ហ្គេមកាក់៖ បោះកាក់ & ស្លុត",
+        btn_jukebox: "ឧបករណ៍ភ្លេង Lo-Fi",
+        btn_save_profile: "រក្សាទុកទិន្នន័យ",
+        map_hint: "ចុចលើកម្រាលឥដ្ឋ ឬប្រើ WASD / ព្រួញដើម្បីដើរទៅកាន់ទីតាំងនីមួយៗ",
+        lbl_role: "តួនាទី:",
+        btn_say: "និយាយ",
+        lbl_best_score: "កាក់",
+        btn_set_name: "រក្សាទុក",
+        sync_hint: "បានភ្ជាប់ទៅកាន់ Supabase Realtime រួចរាល់! ដើរ និងជជែកផ្ទាល់ជាមួយសមាជិកឯទៀត។",
+        leader_title: "អ្នកមានកាក់ច្រើនជាងគេ",
+        btn_refresh: "↻ ផ្ទុកឡើងវិញ",
+        leader_footer: "ឈ្នះកាក់ក្នុង Arcade ដើម្បីឡើងចំណាត់ថ្នាក់!",
+        board_eyebrow: "ក្តារចែករំលែកសហគមន៍អនឡាញ",
+        board_title: "ចែករំលែកគន្លឹះ តន្ត្រី និងបបួលលេងហ្គេម",
+        filter_all: "ទាំងអស់",
+        filter_game: "ហ្គេម",
+        filter_music: "តន្ត្រី",
+        filter_tips: "គន្លឹះ & ទីផ្សារ",
+        filter_chill: "ជជែកលេង",
+        btn_pin: "បង្ហោះសារ",
+        discord_desc: "ចូលរួមបន្ទប់សំឡេង សម្រាប់លេងហ្គេមពេលយប់ ស្តាប់ភ្លេង Lo-Fi និងជជែកកម្សាន្ត។",
+        btn_open_discord: "ចូលរួម TRUE Discord",
+        telegram_desc: "ជជែកប្រចាំថ្ងៃ ផ្ញើស្ទីគ័រ ណាត់ជួបផឹកកាហ្វេនៅភ្នំពេញ និងចែករំលែកគន្លឹះល្អៗ។",
+        btn_open_telegram: "ចូលរួម TRUE Telegram",
+        sync_hint_guest: "ក្នុងរបៀបភ្ញៀវ៖ ចូលដោយប្រើ Discord ដើម្បីទទួលកាក់ រក្សាទុកប្រូហ្វាល និងបង្ហោះសារ។",
+        guest_name: "ភ្ញៀវ",
+        guest_role: "👀 មើលបានតែប៉ុណ្ណោះ",
+        guest_banner: "អ្នកកំពុងមើលក្នុងនាមជាភ្ញៀវ។ ចូលដោយប្រើ Discord ដើម្បីជជែក លេងហ្គេមកាក់ ទទួលកាក់ប្រចាំថ្ងៃ បង្ហោះសារ និងចុចចូលចិត្ត។",
+        chat_placeholder: "ជជែកផ្ទាល់ជាមួយសមាជិកក្នុងបន្ទប់...",
+        chat_locked: "🔒 ចូលដោយប្រើ Discord ដើម្បីជជែក",
+        name_placeholder: "កំណត់ឈ្មោះហៅក្រៅ...",
+        name_locked: "🔒 ចូលគណនីដើម្បីកំណត់ឈ្មោះ",
+        post_placeholder: "ចែករំលែកការអញ្ជើញលេងហ្គេម បទ Lo-Fi ឬគន្លឹះល្អៗជាមួយ TRUE Community...",
+        post_locked: "🔒 ចូលដោយប្រើ Discord ដើម្បីបង្ហោះសារ",
+        need_login: "សូមចូលដោយប្រើ Discord ជាមុនសិន។",
+        need_login_chat: "🔒 ចូលដោយប្រើ Discord ដើម្បីជជែក និងផ្ញើអារម្មណ៍។",
+        need_login_arcade: "🔒 ចូលដោយប្រើ Discord ដើម្បីប្រើកាក់ និងលេងហ្គេម Arcade។",
+        need_login_post: "🔒 ចូលដោយប្រើ Discord ដើម្បីបង្ហោះសារលើក្តារ។",
+        need_login_like: "🔒 ចូលដោយប្រើ Discord ដើម្បីចុចចូលចិត្ត។",
+        need_login_profile: "🔒 ចូលដោយប្រើ Discord ដើម្បីកែប្រែ និងរក្សាទុកប្រូហ្វាល។",
+        arcade_gate_title: "ហ្គេម Arcade ត្រូវបានចាក់សោ",
+        arcade_gate_body: "មានតែសមាជិក Discord ប៉ុណ្ណោះដែលអាចទទួលកាក់ និងលេងបោះកាក់ & ស្លុតបាន ដើម្បីឱ្យកាក់របស់អ្នកត្រូវបានរក្សាទុកដោយសុវត្ថិភាព។ សូមចូលគណនីដើម្បីចាប់ផ្តើម!",
+
+        popup_title: "សូមស្វាគមន៍មកកាន់ TRUE CLUB",
+        popup_heading: "ចូលរួមសហគមន៍ភីកសែលរបស់យើង!",
+        popup_desc: "ជជែកកម្សាន្ត លេងហ្គេម ស្តាប់បទ Lo-Fi និងចែករំលែកគន្លឹះក្នុង Discord និង Telegram!",
+        popup_auto_close: "នឹងបិទស្វ័យប្រវត្តិក្នុង ",
+        popup_stay: "រុករកបន្ត",
+        login_failed: "ការចូលដោយ Discord បរាជ័យ៖",
+        server_offline: "មិនអាចតភ្ជាប់ទៅម៉ាស៊ីនបម្រើបានទេ។ សូមព្យាយាមម្តងទៀតពេលក្រោយ។",
+        save_failed: "មិនអាចរក្សាទុកក្នុងមូលដ្ឋានទិន្នន័យបានទេ។ សូមព្យាយាមម្តងទៀត។",
+        post_failed: "មិនអាចបង្ហោះសារបានទេ។ សូមព្យាយាមម្តងទៀត។",
+        like_failed: "មិនអាចរក្សាទុកការចូលចិត្តបានទេ។ សូមព្យាយាមម្តងទៀត។",
+        btn_rewards: "រង្វាន់ប្រចាំថ្ងៃ",
+        arcade_title: "ហ្គេមកាក់ TRUE",
+        wallet_label: "កាក់របស់ខ្ញុំ",
+        tab_flip: "បោះកាក់",
+        tab_slots: "ស្លុត",
+        tab_tasks: "រង្វាន់",
+        task_daily: "កាក់ប្រចាំថ្ងៃ",
+        task_login: "ចូលគណនីថ្ងៃនេះ",
+        task_share: "ចែករំលែក TRUE Community",
+        task_chat: "ជជែកក្នុងបន្ទប់",
+        task_claim: "ទទួល",
+        task_claimed: "បានទទួលរួច",
+        task_pending: "មិនទាន់ធ្វើ",
+        task_share_btn: "ចែករំលែកឥឡូវ",
+        task_go_chat: "ទៅជជែក",
+        tasks_hint: "បញ្ចប់ភារកិច្ច រួចចុច «ទទួល»។ ទាំងអស់កំណត់ឡើងវិញរៀងរាល់ថ្ងៃម៉ោង 00:00 (ម៉ោងភ្នំពេញ)។ ទទួលបានអតិបរមា 100 កាក់ក្នុងមួយថ្ងៃ។",
+        not_enough: "កាក់មិនគ្រប់គ្រាន់ទេ — សូមទទួលរង្វាន់ប្រចាំថ្ងៃជាមុនសិន!",
+        you_won: "អ្នកឈ្នះ",
+        you_lost: "អ្នកចាញ់",
+        coin_error: "មានបញ្ហាកើតឡើង។ សូមព្យាយាមម្តងទៀត។",
+        coin_setup: "ប្រព័ន្ធកាក់មិនទាន់ត្រូវបានតំឡើងទេ (សូមដំណើរការ supabase_coins.sql ក្នុង Supabase)។",
+        link_copied: "បានចម្លងតំណ! បិទភ្ជាប់ដើម្បីចែករំលែកជាមួយមិត្តភក្តិ។",
+        share_text: "មកលេងជាមួយ TRUE Community — ដើរ ជជែក និងលេងហ្គេមជុំគ្នា!",
+        heads: "មុខ",
+        tails: "ក្រោយ",
+        bet_label: "ភ្នាល់:",
+        flip_intro: "ជ្រើសរើសខាងមួយ ហើយបោះ!",
+        flip_rules: "ឱកាស 50/50។ ឈ្នះបានបន្ថែម +90% នៃកាក់ភ្នាល់។",
+        slots_intro: "ចុច «បង្វិល»!",
+        spin_btn: "បង្វិល",
+        slots_paytable: "ដូចគ្នា 3: 🍒×4 🍋×6 🔔×10 💎×20 7️⃣×50 · ដូចគ្នា 2: សង់កាក់ភ្នាល់វិញ",
+        slot_triple: "ជ័យលាភី! អ្នកឈ្នះ",
+        slot_pair: "ដូចគ្នា 2! សង់កាក់ភ្នាល់វិញ",
+        btn_install: "តំឡើងកម្មវិធី",
+        install_title: "បន្ថែម TRUE CLUB ទៅអេក្រង់ដើម",
+        install_sub: "បើក TRUE Community ដូចកម្មវិធីពិតប្រាកដ ពេញអេក្រង់។",
+        install_ios_1: "បើកទំព័រនេះក្នុង Safari រួចចុចប៊ូតុង Share (ការ៉េមានព្រួញ ⬆️) នៅខាងក្រោមអេក្រង់។",
+        install_ios_2: "អូសចុះក្រោម រួចចុច “Add to Home Screen”។",
+        install_ios_3: "ពិនិត្យឈ្មោះ “TRUE Club” រួចចុច Add។ រូបសញ្ញា TRUE នឹងបង្ហាញលើអេក្រង់ដើមរបស់អ្នក។",
+        install_and_1: "ចុចម៉ឺនុយ ⋮ នៅជ្រុងខាងលើស្តាំនៃកម្មវិធីរុករក (Chrome)។",
+        install_and_2: "ចុច “Install app” (ឬ “Add to Home screen”)។",
+        install_and_3: "បញ្ជាក់។ រូបសញ្ញា TRUE Club នឹងបង្ហាញលើអេក្រង់ដើមរបស់អ្នក។",
+        install_done: "✅ បានតំឡើងរួចរាល់! បើក TRUE Club ពីអេក្រង់ដើមរបស់អ្នក។"
+      }
+    };
+
+    function setLanguage(lang) {
+      currentLang = lang;
+      document.body.classList.toggle('lang-kh', lang === 'kh');
+      document.body.classList.toggle('lang-en', lang === 'en');
+
+      document.getElementById('btnLangEN').className = lang === 'en'
+        ? 'px-2.5 py-1 text-xs font-bold bg-trueGreen text-trueVoid transition'
+        : 'px-2.5 py-1 text-xs font-bold text-gray-300 hover:text-white transition';
+      document.getElementById('btnLangKH').className = lang === 'kh'
+        ? 'px-2.5 py-1 text-xs font-bold bg-trueGreen text-trueVoid transition font-khmer'
+        : 'px-2.5 py-1 text-xs font-bold text-gray-300 hover:text-white transition font-khmer';
+
+      document.querySelectorAll('[data-i18n]').forEach(el => {
+        const key = el.getAttribute('data-i18n');
+        if (i18n[lang][key]) el.textContent = i18n[lang][key];
+      });
+
+      updateProfileUI();
+      renderBulletinBoard();
+    }
+
+    /******************************************************************
+     * 3. AUTH (DISCORD ONLY) & SUPABASE DATABASE SYNC
+     *
+     *    GUEST  = not logged in with Discord. Can walk around, watch the
+     *             room, read the wall/leaderboard and use the jukebox.
+     *             CANNOT chat, emote, play the arcade, post, like, change
+     *             profile — and NOTHING is written to Supabase or
+     *             localStorage for a guest.
+     *    MEMBER = real Supabase Discord session. Everything unlocked.
+     *
+     *    Login state comes ONLY from the Supabase session (never from
+     *    localStorage). Server-side rules live in supabase_setup.sql.
+     ******************************************************************/
+    const ROLES = [
+      { nameEn: '🎮 Gamer', nameKh: '🎮 អ្នកលេងហ្គេម', color: '#2dce89' },
+      { nameEn: '☕ Chiller', nameKh: '☕ អ្នកចូលចិត្តជជែក', color: '#38bdf8' },
+      { nameEn: '🎵 Music Lover', nameKh: '🎵 អ្នកស្រឡាញ់តន្ត្រី', color: '#a855f7' },
+      { nameEn: '💡 Tip Sharer', nameKh: '💡 អ្នកចែករំលែកគន្លឹះ', color: '#fbbf24' }
+    ];
+
+    // i18n lookup with English fallback
+    const t = (key) => (i18n[currentLang] && i18n[currentLang][key]) || i18n.en[key] || key;
+
+    // Escaping helpers: everything that comes from the DB or from other
+    // players is untrusted before it goes into innerHTML.
+    function esc(s) {
+      return String(s ?? '').replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+    }
+    function safeUrl(u, seed) {
+      try {
+        const x = new URL(u);
+        if (x.protocol === 'https:' || x.protocol === 'http:') return x.href;
+      } catch (e) {}
+      return 'https://api.dicebear.com/7.x/pixel-art/svg?seed=' + encodeURIComponent(seed || 'player');
+    }
+    function safeColor(c) { return /^#[0-9a-f]{6}$/i.test(c || '') ? c : '#2dce89'; }
+
+    const GUEST_AVATAR = 'https://api.dicebear.com/7.x/pixel-art/svg?seed=Guest';
+    function makeGuest() {
+      return { id: null, isDiscordAuth: false, username: 'Guest', avatar_url: GUEST_AVATAR, role_idx: 0, high_score: 0 };
+    }
+
+    let currentUser = makeGuest();
+    function isLoggedIn() { return !!(currentUser.isDiscordAuth && currentUser.id); }
+
+    const playerAvatarImage = new Image();
+    playerAvatarImage.crossOrigin = "Anonymous";
+    let loadedAvatarUrl = null;
+    function refreshAvatarImage() {
+      if (loadedAvatarUrl !== currentUser.avatar_url) {
+        loadedAvatarUrl = currentUser.avatar_url;
+        playerAvatarImage.src = currentUser.avatar_url;
+      }
+    }
+    refreshAvatarImage();
+
+    // Re-render everything that depends on who is logged in (no DB, no storage)
+    function refreshLocalUI() {
+      refreshAvatarImage();
+      updateProfileUI();
+      updateRealtimePresence();
+    }
+
+    /* ---------- Toast + "login required" guard ---------- */
+    let toastTimer = null;
+    function showToast(message, withLogin = false) {
+      const box = document.getElementById('toast');
+      document.getElementById('toastText').textContent = message;
+      document.getElementById('toastLoginBtn').classList.toggle('hidden', !withLogin);
+      box.classList.remove('hidden');
+      box.classList.add('flex');
+      clearTimeout(toastTimer);
+      toastTimer = setTimeout(hideToast, withLogin ? 6000 : 4500);
+    }
+    function hideToast() {
+      const box = document.getElementById('toast');
+      box.classList.add('hidden');
+      box.classList.remove('flex');
+    }
+
+    // Returns true if the member is logged in. Otherwise tells the guest why not.
+    function requireLogin(reasonKey) {
+      if (isLoggedIn()) return true;
+      showToast(t(reasonKey || 'need_login'), true);
+      return false;
+    }
+
+    // Lock / unlock every member-only control
+    function applyAuthGate() {
+      const loggedIn = isLoggedIn();
+      document.querySelectorAll('.auth-only').forEach(el => el.classList.toggle('is-locked', !loggedIn));
+      document.querySelectorAll('[data-auth-input]').forEach(el => {
+        const k = el.getAttribute('data-auth-input');
+        el.readOnly = !loggedIn;
+        el.placeholder = t(k + (loggedIn ? '_placeholder' : '_locked'));
+        el.classList.toggle('is-locked', !loggedIn);
+      });
+      document.getElementById('guestBanner').classList.toggle('hidden', loggedIn);
+    }
+
+    function updateProfileUI() {
+      const roleObj = ROLES[currentUser.role_idx] || ROLES[0];
+      const roleText = currentLang === 'kh' ? roleObj.nameKh : roleObj.nameEn;
+      const loggedIn = isLoggedIn();
+
+      document.getElementById('topBarBestScore').textContent = loggedIn ? wallet.coins : '—';
+      document.getElementById('cardUsername').textContent = loggedIn ? currentUser.username : t('guest_name');
+      document.getElementById('cardHighScore').textContent = loggedIn ? wallet.coins : '—';
+      document.getElementById('cardRoleLabel').textContent = loggedIn ? roleText : t('guest_role');
+      document.getElementById('cardAvatarImg').src = currentUser.avatar_url;
+      document.getElementById('roleCycleBtn').textContent = roleText;
+      document.getElementById('authStatusDot').className =
+        'w-3 h-3 border border-black absolute -bottom-1 -right-1 ' + (loggedIn ? 'bg-trueGreen' : 'bg-gray-500');
+
+      const feedbackEl = document.getElementById('syncFeedbackText');
+      feedbackEl.textContent = t(loggedIn ? 'sync_hint' : 'sync_hint_guest');
+      feedbackEl.className = 'text-xs ' + (loggedIn ? 'text-gray-300' : 'text-pixelGold font-bold');
+
+      const loginBtn = document.getElementById('discordLoginBtn');
+      const profileBar = document.getElementById('userProfileBar');
+      const discordBadge = document.getElementById('discordVerifiedBadge');
+
+      if (loggedIn) {
+        loginBtn.classList.add('hidden');
+        profileBar.classList.remove('hidden');
+        profileBar.classList.add('flex');
+        document.getElementById('userAvatarImg').src = currentUser.avatar_url;
+        document.getElementById('userNameLabel').textContent = currentUser.username;
+        document.getElementById('userScoreLabel').textContent = wallet.coins;
+        discordBadge.classList.remove('hidden');
+      } else {
+        loginBtn.classList.remove('hidden');
+        profileBar.classList.add('hidden');
+        profileBar.classList.remove('flex');
+        discordBadge.classList.add('hidden');
+      }
+      // rewards badge (claimable tasks) + live balance inside the arcade modal
+      const badge = document.getElementById('rewardsBadge');
+      const claimable = loggedIn ? claimableCount() : 0;
+      badge.textContent = claimable;
+      badge.classList.toggle('hidden', claimable === 0);
+      const walletEl = document.getElementById('walletCoins');
+      if (walletEl) walletEl.textContent = '🪙 ' + wallet.coins;
+      applyAuthGate();
+    }
+
+    /* ---------- Login / logout (real Discord OAuth only) ---------- */
+    async function loginWithDiscord() {
+      if (!isSupabaseConnected) { showToast(t('server_offline')); return; }
+      const { error } = await supabaseClient.auth.signInWithOAuth({
+        provider: 'discord',
+        options: { redirectTo: window.location.href.split('#')[0].split('?')[0] }
+      });
+      if (error) showToast(t('login_failed') + ' ' + error.message);
+    }
+
+    async function logoutUser() {
+      closeStationModal();
+      if (isSupabaseConnected) await supabaseClient.auth.signOut();
+      await applySession(null);
+    }
+
+    // Single place where "who is the user" is decided: the Supabase session.
+    let appliedUserId; // undefined = never applied yet
+    async function applySession(session) {
+      const uid = (session && session.user && session.user.id) || null;
+      if (uid === appliedUserId) return; // token refresh etc. — nothing changed
+      appliedUserId = uid;
+
+      wallet = { coins: 0, tasks: {} };
+      if (uid) {
+        const meta = session.user.user_metadata || {};
+        currentUser = {
+          id: uid,
+          isDiscordAuth: true,
+          username: String(meta.full_name || meta.name || (meta.custom_claims && meta.custom_claims.global_name) || 'Discord_Member').slice(0, 32),
+          avatar_url: safeUrl(meta.avatar_url, uid),
+          role_idx: 0,
+          high_score: 0
+        };
+        const { data: prof } = await supabaseClient
+          .from('profiles')
+          .select('username, role_idx, high_score')
+          .eq('id', uid)
+          .maybeSingle();
+        if (appliedUserId !== uid) return; // user changed while loading
+        if (prof) {
+          currentUser.username = prof.username || currentUser.username; // keeps custom nickname
+          currentUser.role_idx = prof.role_idx ?? 0;
+          currentUser.high_score = prof.high_score || 0;
+        }
+        refreshLocalUI();
+        await restartRealtime();
+        await syncProfileToDatabase(false);
+        await completeTask('login');   // "login today" task (returns the wallet state)
+        await refreshWallet();
+      } else {
+        currentUser = makeGuest();
+        refreshLocalUI();
+        await restartRealtime();
+      }
+      fetchLeaderboard();
+    }
+
+    /* ---------- Member-only profile actions ---------- */
+    function updateCustomNickname() {
+      if (!requireLogin('need_login_profile')) return;
+      const input = document.getElementById('customNameInput');
+      const val = input.value.trim().slice(0, 16);
+      if (!val) return;
+      currentUser.username = val;
+      input.value = '';
+      refreshLocalUI();
+      syncProfileToDatabase(true);
+      player.chatBubble = `I am ${val}! ✨`;
+      player.chatTimer = 180;
+    }
+
+    function cycleRole() {
+      if (!requireLogin('need_login_profile')) return;
+      currentUser.role_idx = (currentUser.role_idx + 1) % ROLES.length;
+      refreshLocalUI();
+      syncProfileToDatabase(false);
+    }
+
+    async function syncProfileToDatabase(showNotice = false) {
+      // Guests never touch the database.
+      if (!isLoggedIn()) {
+        if (showNotice) requireLogin('need_login_profile');
+        return false;
+      }
+      if (!isSupabaseConnected) { if (showNotice) showToast(t('server_offline')); return false; }
+
+      const uid = currentUser.id;
+      const feedbackEl = document.getElementById('syncFeedbackText');
+      const { error } = await supabaseClient.from('profiles').upsert({
+        id: String(uid),
+        username: currentUser.username,
+        avatar_url: currentUser.avatar_url,
+        role_idx: currentUser.role_idx,
+        high_score: currentUser.high_score,
+        updated_at: new Date().toISOString()
+      }, { onConflict: 'id' });
+
+      if (appliedUserId !== uid) return false; // logged out meanwhile
+
+      if (error) {
+        console.warn('Profile save failed:', error);
+        setDbStatusUI('warn', 'DB: SAVE FAILED (CHECK SQL / POLICIES)');
+        if (showNotice) showToast(t('save_failed'));
+        return false;
+      }
+      setDbStatusUI('live', 'DB: SUPABASE LIVE (SYNCED)');
+      if (showNotice) {
+        feedbackEl.textContent = "✅ Saved to Supabase Cloud Database!";
+        feedbackEl.className = "text-xs text-trueGreen font-bold";
+      }
+      fetchLeaderboard();
+      return true;
+    }
+
+    /* ---------- Leaderboard (read-only, public) ---------- */
+    function getDefaultLeaderboard() {
+      return [
+        { username: "Sokha_KH", avatar_url: "https://api.dicebear.com/7.x/pixel-art/svg?seed=Sokha", role_idx: 0, coins: 240 },
+        { username: "Dara_Gold", avatar_url: "https://api.dicebear.com/7.x/pixel-art/svg?seed=Dara", role_idx: 3, coins: 195 },
+        { username: "Malis_Beats", avatar_url: "https://api.dicebear.com/7.x/pixel-art/svg?seed=Malis", role_idx: 2, coins: 165 },
+        { username: "Vireak_GG", avatar_url: "https://api.dicebear.com/7.x/pixel-art/svg?seed=Vireak", role_idx: 1, coins: 120 }
+      ];
+    }
+
+    async function fetchLeaderboard() {
+      let leaders = [];
+      if (isSupabaseConnected) {
+        const { data, error } = await supabaseClient.rpc('top_coins', { p_limit: 8 });
+        if (!error && Array.isArray(data)) {
+          setDbStatusUI('live', 'DB: SUPABASE LIVE');
+          leaders = data;
+        } else if (error) {
+          console.warn('Leaderboard failed (run supabase_coins.sql?):', error);
+        }
+      }
+      // Display-only demo rows when the DB is empty/unreachable (never saved anywhere)
+      if (leaders.length === 0) leaders = getDefaultLeaderboard();
+
+      const loggedIn = isLoggedIn();
+      const container = document.getElementById('leaderboardList');
+      container.innerHTML = leaders.slice(0, 8).map((item, idx) => {
+        const rankColors = ['text-pixelGold', 'text-gray-300', 'text-amber-500'];
+        const rankBadge = idx === 0 ? '👑 #1' : `#${idx + 1}`;
+        const isMe = loggedIn && item.username === currentUser.username;
+        return `
+          <div class="flex items-center justify-between bg-trueVoid px-3 py-2 border-2 ${isMe ? 'border-trueGreen' : 'border-black'}">
+            <div class="flex items-center gap-2.5">
+              <span class="font-bold text-xs w-8 ${rankColors[idx] || 'text-gray-400'}">${rankBadge}</span>
+              <img src="${esc(safeUrl(item.avatar_url, item.username))}" alt="avatar" class="w-7 h-7 border border-gray-600 bg-trueSlateDark" />
+              <div>
+                <div class="text-sm font-bold text-white leading-none">${esc(item.username)} ${isMe ? '<span class="text-trueGreen text-[10px]">(YOU)</span>' : ''}</div>
+                <div class="text-[11px] text-gray-400">${esc((ROLES[item.role_idx] || ROLES[0]).nameEn)}</div>
+              </div>
+            </div>
+            <div class="pixel-heading text-xs text-pixelGold">🪙 ${Number(item.coins) || 0}</div>
+          </div>
+        `;
+      }).join('');
+    }
+
+    /******************************************************************
+     * 4. SUPABASE REALTIME MULTIPLAYER (PRESENCE + BROADCAST)
+     *    Guests join the channel as silent spectators: they receive
+     *    movement/chat but never track presence or send anything.
+     ******************************************************************/
+    // Set to true AFTER running section 4 of supabase_setup.sql. It makes
+    // Supabase itself reject guests from sending/tracking on the channel.
+    const USE_PRIVATE_CHANNEL = false;
+
+    const remotePlayers = new Map();
+    const ALLOWED_EMOTES = ['💚', '☕', '🎮', '🎵', '🔥'];
+    let roomChannel = null;
+    let myPresenceKey = null;
+    let lastBroadcastTime = 0;
+
+    async function restartRealtime() {
+      if (!isSupabaseConnected) return;
+      if (roomChannel) {
+        const old = roomChannel;
+        roomChannel = null;
+        try { await supabaseClient.removeChannel(old); } catch (e) {}
+      }
+      remotePlayers.clear();
+      document.getElementById('onlineCountLabel').textContent = 1;
+      initSupabaseRealtimeMultiplayer();
+    }
+
+    function initSupabaseRealtimeMultiplayer() {
+      if (!isSupabaseConnected) return;
+
+      myPresenceKey = isLoggedIn() ? String(currentUser.id) : 'guest_' + Math.random().toString(36).slice(2, 10);
+
+      const channel = supabaseClient.channel('true-clubhouse-room', {
+        config: {
+          private: USE_PRIVATE_CHANNEL,
+          presence: { key: myPresenceKey },
+          broadcast: { self: false }
+        }
+      });
+      roomChannel = channel;
+
+      channel
+        .on('presence', { event: 'sync' }, () => {
+          const state = channel.presenceState();
+          const activeIds = new Set();
+
+          for (const id in state) {
+            if (id === myPresenceKey) continue;
+            const pData = state[id] && state[id][0];
+            if (!pData) continue;
+            activeIds.add(id);
+
+            if (!remotePlayers.has(id)) {
+              const username = String(pData.username || 'Member').slice(0, 32);
+              const avatar = safeUrl(pData.avatar_url, username);
+              const img = new Image();
+              img.crossOrigin = 'Anonymous';
+              img.src = avatar;
+
+              remotePlayers.set(id, {
+                id,
+                username,
+                avatar_url: avatar,
+                avatarImg: img,
+                role_idx: pData.role_idx || 0,
+                high_score: pData.high_score || 0,
+                x: pData.x || 400,
+                y: pData.y || 250,
+                targetX: pData.x || 400,
+                targetY: pData.y || 250,
+                chatBubble: null,
+                chatTimer: 0,
+                emote: null,
+                emoteTimer: 0
+              });
+            } else {
+              const existing = remotePlayers.get(id);
+              existing.username = String(pData.username || existing.username).slice(0, 32);
+              existing.role_idx = pData.role_idx ?? existing.role_idx;
+              existing.high_score = pData.high_score ?? existing.high_score;
+            }
+          }
+
+          for (const [id] of remotePlayers) {
+            if (!activeIds.has(id)) remotePlayers.delete(id);
+          }
+
+          document.getElementById('onlineCountLabel').textContent = remotePlayers.size + 1;
+        })
+        .on('presence', { event: 'leave' }, ({ key }) => {
+          remotePlayers.delete(key);
+          document.getElementById('onlineCountLabel').textContent = remotePlayers.size + 1;
+        })
+        // Only messages from players who are tracked in presence (= logged-in
+        // members) are accepted. Unknown senders are ignored.
+        .on('broadcast', { event: 'player_move' }, ({ payload }) => {
+          const target = payload && remotePlayers.get(payload.id);
+          if (target) {
+            target.targetX = Number(payload.x) || target.targetX;
+            target.targetY = Number(payload.y) || target.targetY;
+            target.role_idx = payload.role_idx ?? target.role_idx;
+          }
+        })
+        .on('broadcast', { event: 'player_chat' }, ({ payload }) => {
+          const target = payload && remotePlayers.get(payload.id);
+          const text = payload && String(payload.text || '').slice(0, 42);
+          if (target && text) {
+            target.chatBubble = text;
+            target.chatTimer = 260;
+          }
+        })
+        .on('broadcast', { event: 'player_emote' }, ({ payload }) => {
+          const target = payload && remotePlayers.get(payload.id);
+          if (target && ALLOWED_EMOTES.includes(payload.emoji)) {
+            target.emote = payload.emoji;
+            target.emoteTimer = 95;
+          }
+        });
+
+      channel.subscribe(async (status) => {
+        if (status === 'SUBSCRIBED') {
+          await updateRealtimePresence(); // no-op for guests
+        } else if (status === 'CHANNEL_ERROR' || status === 'TIMED_OUT') {
+          console.warn('Realtime channel status:', status,
+            USE_PRIVATE_CHANNEL ? '(did you run section 4 of supabase_setup.sql?)' : '');
+        }
+      });
+    }
+
+    async function updateRealtimePresence() {
+      if (!roomChannel || !isLoggedIn()) return; // guests are never announced
+      try {
+        await roomChannel.track({
+          id: String(currentUser.id),
+          username: currentUser.username,
+          avatar_url: currentUser.avatar_url,
+          role_idx: currentUser.role_idx,
+          high_score: currentUser.high_score,
+          x: Math.round(player.x),
+          y: Math.round(player.y)
+        });
+      } catch (e) {}
+    }
+
+    function broadcastPlayerPosition() {
+      if (!roomChannel || !isSupabaseConnected || !isLoggedIn()) return;
+      const now = performance.now();
+      if (now - lastBroadcastTime > 50) {
+        lastBroadcastTime = now;
+        roomChannel.send({
+          type: 'broadcast',
+          event: 'player_move',
+          payload: {
+            id: String(currentUser.id),
+            x: Math.round(player.x),
+            y: Math.round(player.y),
+            role_idx: currentUser.role_idx
+          }
+        });
+      }
+    }
+
+    /******************************************************************
+     * 5. WEB AUDIO SYNTH LO-FI JUKEBOX
+     ******************************************************************/
+    let audioCtx = null;
+    let lofiPlaying = false;
+    let lofiTimer = null;
+    let currentTrackIdx = 0;
+    const LOFI_TRACKS = [
+      { name: "Phnom Penh Rain Lo-Fi", bpm: 420, notes: [261.63, 329.63, 392.00, 493.88, 392.00, 329.63] },
+      { name: "8-Bit Squad Night Drive", bpm: 360, notes: [220.00, 261.63, 329.63, 440.00, 329.63, 293.66] },
+      { name: "Clubhouse Coffee Groove", bpm: 460, notes: [196.00, 246.94, 293.66, 392.00, 329.63, 246.94] }
+    ];
+
+    function toggleLofiAudio(trackOverride) {
+      if (typeof trackOverride === 'number') {
+        currentTrackIdx = trackOverride;
+        if (lofiPlaying) {
+          stopLofi();
+          startLofi();
+          return;
+        }
+      }
+      if (lofiPlaying) stopLofi();
+      else startLofi();
+    }
+
+    function startLofi() {
+      if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+      if (audioCtx.state === 'suspended') audioCtx.resume();
+      lofiPlaying = true;
+      let step = 0;
+      const track = LOFI_TRACKS[currentTrackIdx];
+
+      document.getElementById('topLofiBtn').textContent = `🎵 LO-FI: ON (${track.name.split(' ')[0]})`;
+      document.getElementById('topLofiBtn').className = "text-xs px-2 py-0.5 bg-trueGreen text-trueVoid border border-black font-bold";
+
+      lofiTimer = setInterval(() => {
+        if (!lofiPlaying) return;
+        const freq = track.notes[step % track.notes.length];
+        const osc = audioCtx.createOscillator();
+        const gain = audioCtx.createGain();
+        osc.type = step % 2 === 0 ? 'triangle' : 'sine';
+        osc.frequency.setValueAtTime(freq, audioCtx.currentTime);
+
+        gain.gain.setValueAtTime(0.06, audioCtx.currentTime);
+        gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.38);
+
+        osc.connect(gain);
+        gain.connect(audioCtx.destination);
+        osc.start();
+        osc.stop(audioCtx.currentTime + 0.4);
+        step++;
+      }, track.bpm);
+    }
+
+    function stopLofi() {
+      lofiPlaying = false;
+      if (lofiTimer) clearInterval(lofiTimer);
+      document.getElementById('topLofiBtn').textContent = "🎵 LO-FI: OFF";
+      document.getElementById('topLofiBtn').className = "text-xs px-2 py-0.5 bg-trueSlateDark border border-trueGreen text-trueGreen font-bold";
+    }
+
+    /******************************************************************
+     * 6. WALKABLE 2D PIXEL CLUBHOUSE ENGINE
+     ******************************************************************/
+    const canvas = document.getElementById('clubhouseCanvas');
+    const ctx = canvas.getContext('2d');
+
+    const player = {
+      x: 410,
+      y: 260,
+      targetX: 410,
+      targetY: 260,
+      speed: 3.4,
+      chatBubble: "Walk to the Arcade or Jukebox! 🕹️🎵",
+      chatTimer: 220,
+      emote: null,
+      emoteTimer: 0
+    };
+
+    const keys = {};
+    window.addEventListener('keydown', e => {
+      if (['INPUT', 'TEXTAREA', 'SELECT'].includes(document.activeElement.tagName)) return;
+      keys[e.key.toLowerCase()] = true;
+      if (e.key === ' ' && activeStation) {
+        e.preventDefault();
+        openStationModal(activeStation.id);
+      }
+      if (e.key === 'Escape') closeStationModal();
+    });
+    window.addEventListener('keyup', e => {
+      keys[e.key.toLowerCase()] = false;
+    });
+
+    canvas.addEventListener('pointerdown', e => {
+      const rect = canvas.getBoundingClientRect();
+      const scaleX = canvas.width / rect.width;
+      const scaleY = canvas.height / rect.height;
+      player.targetX = Math.max(50, Math.min(canvas.width - 50, (e.clientX - rect.left) * scaleX));
+      player.targetY = Math.max(90, Math.min(canvas.height - 45, (e.clientY - rect.top) * scaleY));
+    });
+
+    const stations = [
+      { id: 'arcade', x: 135, y: 145, radius: 75, color: '#2dce89', icon: '🕹️', titleEn: 'ARCADE CABINET', titleKh: 'ទូហ្គេមសន្សំពិន្ទុ' },
+      { id: 'jukebox', x: 135, y: 345, radius: 75, color: '#a855f7', icon: '🎵', titleEn: 'LO-FI JUKEBOX', titleKh: 'ទូភ្លេង Lo-Fi' },
+      { id: 'chill', x: 410, y: 245, radius: 85, color: '#38bdf8', icon: '☕', titleEn: 'CHILL COFFEE LOUNGE', titleKh: 'តុកាហ្វេជជែកកម្សាន្ត' },
+      { id: 'tips', x: 685, y: 145, radius: 75, color: '#fbbf24', icon: '💡', titleEn: 'TIPS & MARKET DESK', titleKh: 'តុចែករំលែកគន្លឹះ' }
+    ];
+
+    const npcs = [
+      { name: 'Sokha_KH', x: 345, y: 235, color: '#38bdf8', msg: 'Coffee meetup Saturday! ☕' },
+      { name: 'Dara_Gold', x: 645, y: 185, color: '#fbbf24', msg: 'Always use stop-loss 💡' }
+    ];
+
+    let activeStation = null;
+
+    function sendRoomChat() {
+      if (!requireLogin('need_login_chat')) return; // guests can't chat
+      const input = document.getElementById('roomChatInput');
+      const text = input.value.trim().slice(0, 42);
+      if (!text) return;
+      player.chatBubble = text;
+      player.chatTimer = 260;
+      input.value = '';
+
+      if (roomChannel && isSupabaseConnected) {
+        roomChannel.send({
+          type: 'broadcast',
+          event: 'player_chat',
+          payload: { id: String(currentUser.id), text }
+        });
+      }
+      completeTask('chat'); // daily "chat" task
+    }
+
+    function triggerPlayerEmote(emoji) {
+      if (!requireLogin('need_login_chat')) return; // guests can't emote
+      player.emote = emoji;
+      player.emoteTimer = 95;
+
+      if (roomChannel && isSupabaseConnected) {
+        roomChannel.send({
+          type: 'broadcast',
+          event: 'player_emote',
+          payload: { id: String(currentUser.id), emoji }
+        });
+      }
+    }
+
+    function updateWorld() {
+      let movedByKey = false;
+      if (keys['w'] || keys['arrowup']) { player.y -= player.speed; movedByKey = true; }
+      if (keys['s'] || keys['arrowdown']) { player.y += player.speed; movedByKey = true; }
+      if (keys['a'] || keys['arrowleft']) { player.x -= player.speed; movedByKey = true; }
+      if (keys['d'] || keys['arrowright']) { player.x += player.speed; movedByKey = true; }
+
+      if (movedByKey) {
+        player.targetX = player.x;
+        player.targetY = player.y;
+        broadcastPlayerPosition();
+      } else {
+        const dx = player.targetX - player.x;
+        const dy = player.targetY - player.y;
+        const dist = Math.hypot(dx, dy);
+        if (dist > 3) {
+          player.x += (dx / dist) * player.speed;
+          player.y += (dy / dist) * player.speed;
+          broadcastPlayerPosition();
+        }
+      }
+
+      player.x = Math.max(45, Math.min(canvas.width - 45, player.x));
+      player.y = Math.max(85, Math.min(canvas.height - 40, player.y));
+
+      if (player.chatTimer > 0) player.chatTimer--;
+      if (player.emoteTimer > 0) player.emoteTimer--;
+
+      // Interpolate remote multiplayer characters smoothly
+      for (const [, rp] of remotePlayers) {
+        rp.x += (rp.targetX - rp.x) * 0.22;
+        rp.y += (rp.targetY - rp.y) * 0.22;
+        if (rp.chatTimer > 0) rp.chatTimer--;
+        if (rp.emoteTimer > 0) rp.emoteTimer--;
+      }
+
+      let found = null;
+      for (const st of stations) {
+        if (Math.hypot(player.x - st.x, player.y - st.y) < st.radius) {
+          found = st;
+          break;
+        }
+      }
+      activeStation = found;
+      const promptEl = document.getElementById('stationPrompt');
+      if (activeStation) {
+        promptEl.classList.remove('hidden');
+        document.getElementById('stationPromptText').textContent = `${activeStation.icon} ${currentLang === 'kh' ? activeStation.titleKh : activeStation.titleEn}`;
+        document.getElementById('stationPromptBtn').onclick = () => openStationModal(activeStation.id);
+      } else {
+        promptEl.classList.add('hidden');
+      }
+    }
+
+    function drawPixelCharacter(x, y, name, color, chatMsg, emote, isCurrentPlayer = false, customAvatarImg = null) {
+      ctx.fillStyle = 'rgba(0,0,0,0.45)';
+      ctx.fillRect(x - 12, y + 14, 24, 6);
+
+      ctx.fillStyle = '#0b0d12';
+      ctx.fillRect(x - 8, y + 6, 6, 10);
+      ctx.fillRect(x + 2, y + 6, 6, 10);
+      ctx.fillStyle = color;
+      ctx.fillRect(x - 10, y - 8, 20, 16);
+
+      ctx.fillStyle = '#0b0d12';
+      ctx.fillRect(x - 12, y - 32, 24, 24);
+      const imgToDraw = isCurrentPlayer ? playerAvatarImage : customAvatarImg;
+      if (imgToDraw && imgToDraw.complete && imgToDraw.naturalWidth > 0) {
+        ctx.drawImage(imgToDraw, x - 10, y - 30, 20, 20);
+      } else {
+        ctx.fillStyle = '#fcd34d';
+        ctx.fillRect(x - 9, y - 28, 18, 18);
+        ctx.fillStyle = '#0b0d12';
+        ctx.fillRect(x - 5, y - 21, 3, 3);
+        ctx.fillRect(x + 2, y - 21, 3, 3);
+      }
+
+      ctx.font = 'bold 11px "VT323", "Kantumruy Pro", monospace';
+      const nw = ctx.measureText(name).width + 10;
+      ctx.fillStyle = isCurrentPlayer ? 'rgba(17, 20, 26, 0.92)' : 'rgba(27, 32, 41, 0.85)';
+      ctx.fillRect(x - nw / 2, y + 22, nw, 16);
+      ctx.strokeStyle = isCurrentPlayer ? '#2dce89' : '#000';
+      ctx.strokeRect(x - nw / 2, y + 22, nw, 16);
+      ctx.fillStyle = isCurrentPlayer ? '#2dce89' : '#fff';
+      ctx.textAlign = 'center';
+      ctx.fillText(name, x, y + 33);
+
+      if (chatMsg) {
+        const bw = Math.max(85, ctx.measureText(chatMsg).width + 18);
+        ctx.fillStyle = '#ffffff';
+        ctx.fillRect(x - bw / 2, y - 56, bw, 20);
+        ctx.strokeStyle = '#0b0d12';
+        ctx.lineWidth = 2;
+        ctx.strokeRect(x - bw / 2, y - 56, bw, 20);
+        ctx.fillStyle = '#0b0d12';
+        ctx.fillText(chatMsg, x, y - 42);
+      }
+
+      if (emote) {
+        ctx.font = '18px sans-serif';
+        ctx.fillText(emote, x, y - 62);
+      }
+    }
+
+    function renderWorld() {
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+      for (let gx = 0; gx < canvas.width; gx += 40) {
+        for (let gy = 65; gy < canvas.height; gy += 40) {
+          ctx.fillStyle = ((gx + gy) / 40) % 2 === 0 ? '#1b2029' : '#161b23';
+          ctx.fillRect(gx, gy, 40, 40);
+        }
+      }
+
+      ctx.fillStyle = '#252c38';
+      ctx.fillRect(0, 0, canvas.width, 68);
+      ctx.fillStyle = '#2dce89';
+      ctx.fillRect(0, 65, canvas.width, 4);
+
+      ctx.fillStyle = '#1f3b34';
+      ctx.fillRect(290, 175, 240, 135);
+      ctx.strokeStyle = '#2dce89';
+      ctx.lineWidth = 3;
+      ctx.strokeRect(290, 175, 240, 135);
+
+      stations.forEach(st => {
+        const isNear = activeStation && activeStation.id === st.id;
+        ctx.fillStyle = isNear ? 'rgba(45, 206, 137, 0.22)' : 'rgba(0,0,0,0.4)';
+        ctx.fillRect(st.x - 48, st.y - 35, 96, 70);
+        ctx.strokeStyle = isNear ? '#2dce89' : st.color;
+        ctx.lineWidth = 2;
+        ctx.strokeRect(st.x - 48, st.y - 35, 96, 70);
+
+        ctx.font = '22px sans-serif';
+        ctx.textAlign = 'center';
+        ctx.fillText(st.icon, st.x, st.y + 5);
+
+        const title = currentLang === 'kh' ? st.titleKh : st.titleEn;
+        ctx.font = 'bold 12px "VT323", "Kantumruy Pro", monospace';
+        ctx.fillStyle = '#ffffff';
+        ctx.fillText(title, st.x, st.y - 43);
+      });
+
+      const entities = [
+        ...npcs.map(n => ({ ...n, isPlayer: false, avatarImg: null })),
+        ...Array.from(remotePlayers.values()).map(rp => ({
+          isPlayer: false,
+          x: rp.x,
+          y: rp.y,
+          name: `🟢 ${rp.username}`,
+          color: (ROLES[rp.role_idx] || ROLES[0]).color,
+          msg: rp.chatTimer > 0 ? rp.chatBubble : null,
+          emote: rp.emoteTimer > 0 ? rp.emote : null,
+          avatarImg: rp.avatarImg
+        })),
+        {
+          isPlayer: true,
+          x: player.x,
+          y: player.y,
+          name: isLoggedIn() ? `${currentUser.username} [🪙${wallet.coins}]` : `${t('guest_name')} 👀`,
+          color: (ROLES[currentUser.role_idx] || ROLES[0]).color,
+          msg: player.chatTimer > 0 ? player.chatBubble : null,
+          emote: player.emoteTimer > 0 ? player.emote : null,
+          avatarImg: playerAvatarImage
+        }
+      ].sort((a, b) => a.y - b.y);
+
+      entities.forEach(ent => {
+        drawPixelCharacter(ent.x, ent.y, ent.name, ent.color, ent.msg, ent.emote, ent.isPlayer, ent.avatarImg);
+      });
+    }
+
+    function gameLoop() {
+      updateWorld();
+      renderWorld();
+      requestAnimationFrame(gameLoop);
+    }
+
+    /******************************************************************
+     * 7. STATIONS, COIN WALLET, DAILY REWARDS, FLIP COIN & SLOTS
+     *
+     *    Coins live ONLY on the server (see supabase_coins.sql). Each action
+     *    below calls a SQL function that checks the Discord login, rolls the
+     *    dice and updates the balance — the browser can't give itself coins.
+     ******************************************************************/
+    const BET_OPTIONS = [10, 20, 50, 100];
+    const SLOT_SYMBOLS = ['🍒', '🍋', '🔔', '💎', '7️⃣'];
+    const TASKS = [
+      { id: 'daily', icon: '🎁', reward: 50, nameKey: 'task_daily' },
+      { id: 'login', icon: '🔑', reward: 10, nameKey: 'task_login' },
+      { id: 'share', icon: '📣', reward: 30, nameKey: 'task_share' },
+      { id: 'chat',  icon: '💬', reward: 10, nameKey: 'task_chat' }
+    ];
+
+    let wallet = { coins: 0, tasks: {} };
+    let modalMode = null;       // 'arcade' while the coin arcade is open
+    let arcadeTab = 'flip';     // 'flip' | 'slots' | 'tasks'
+    let arcadeBusy = false;
+    const arcadeState = {
+      flip:  { bet: 10, face: null, msg: '', cls: '' },
+      slots: { bet: 10, reels: [0, 1, 2], msg: '', cls: '' }
+    };
+    const sleep = ms => new Promise(r => setTimeout(r, ms));
+
+    let lbTimer = null;
+    function scheduleLeaderboardRefresh() {
+      clearTimeout(lbTimer);
+      lbTimer = setTimeout(fetchLeaderboard, 1500);
+    }
+
+    function claimableCount() {
+      return TASKS.filter(d => {
+        const s = wallet.tasks[d.id] || {};
+        return !s.claimed && (d.id === 'daily' || s.completed);
+      }).length;
+    }
+
+    /* ---------- Wallet (server state) ---------- */
+    function applyWalletState(s) {
+      if (!s) return;
+      wallet.coins = Number(s.coins) || 0;
+      wallet.tasks = {};
+      (s.tasks || []).forEach(r => { wallet.tasks[r.task] = r; });
+      updateProfileUI();
+    }
+
+    async function walletRpc(fn, args) {
+      const { data, error } = await supabaseClient.rpc(fn, args || {});
+      if (error) throw error;
+      return data;
+    }
+
+    function coinErrorMessage(e) {
+      const msg = String((e && e.message) || '');
+      if (e && (e.code === 'PGRST202' || e.code === '42883' || /could not find the function/i.test(msg))) return t('coin_setup');
+      if (/not enough coins/i.test(msg)) return t('not_enough');
+      return t('coin_error');
+    }
+
+    async function refreshWallet() {
+      if (!isLoggedIn() || !isSupabaseConnected) return;
+      try {
+        applyWalletState(await walletRpc('get_wallet'));
+      } catch (e) {
+        console.warn('Wallet load failed:', e);
+      }
+    }
+
+    async function completeTask(task) {
+      if (!isLoggedIn() || !isSupabaseConnected) return;
+      const cur = wallet.tasks[task];
+      if (cur && cur.completed) return;
+      try {
+        applyWalletState(await walletRpc('complete_task', { p_task: task }));
+      } catch (e) {
+        console.warn('Task update failed:', e);
+      }
+    }
+
+    async function claimTask(task) {
+      if (!requireLogin('need_login_arcade')) return;
+      try {
+        applyWalletState(await walletRpc('claim_reward', { p_task: task }));
+        const def = TASKS.find(x => x.id === task);
+        showToast(`🪙 +${def ? def.reward : ''}`);
+        scheduleLeaderboardRefresh();
+      } catch (e) {
+        console.warn('Claim failed:', e);
+        showToast(coinErrorMessage(e));
+        await refreshWallet();
+      }
+      renderArcade();
+    }
+
+    async function doShare() {
+      if (!requireLogin('need_login_arcade')) return;
+      const url = window.location.href.split('#')[0].split('?')[0];
+      try {
+        if (navigator.share) {
+          await navigator.share({ title: 'TRUE Community', text: t('share_text'), url });
+        } else {
+          await navigator.clipboard.writeText(url);
+          showToast(t('link_copied'));
+        }
+      } catch (e) {
+        if (e && e.name === 'AbortError') return; // user closed the share sheet
+        try { await navigator.clipboard.writeText(url); showToast(t('link_copied')); } catch (_) { return; }
+      }
+      await completeTask('share');
+      renderArcade();
+    }
+
+    function goChat() {
+      closeStationModal();
+      document.getElementById('world-section').scrollIntoView({ behavior: 'smooth' });
+      setTimeout(() => document.getElementById('roomChatInput').focus(), 450);
+    }
+
+    /* ---------- Modal shell ---------- */
+    function openStationModal(stationId, tab) {
+      const modal = document.getElementById('stationModal');
+      const body = document.getElementById('modalBody');
+      const iconEl = document.getElementById('modalIcon');
+      modal.classList.remove('hidden');
+      modal.classList.add('flex');
+      modalMode = null;
+
+      // Coin arcade + rewards are members-only: guests see a login gate
+      if (stationId === 'arcade' || stationId === 'rewards') {
+        if (!isLoggedIn()) {
+          iconEl.textContent = '🔒';
+          document.getElementById('modalTitle').textContent = t('arcade_gate_title');
+          body.innerHTML = `
+            <div class="space-y-4 text-center">
+              <div class="text-5xl">🔒</div>
+              <p class="text-base text-gray-100">${esc(t('arcade_gate_body'))}</p>
+              <button onclick="closeStationModal(); loginWithDiscord()" class="pixel-btn bg-discord text-white font-bold px-5 py-2.5 text-sm">
+                ${esc(t('btn_discord_login'))}
+              </button>
+            </div>
+          `;
+          return;
+        }
+        modalMode = 'arcade';
+        arcadeTab = tab || (stationId === 'rewards' ? 'tasks' : 'flip');
+        iconEl.textContent = '🪙';
+        document.getElementById('modalTitle').textContent = t('arcade_title');
+        renderArcade();
+        refreshWallet().then(renderArcade); // pick up a new day / other devices
+        return;
+      }
+
+      if (stationId === 'jukebox') {
+        iconEl.textContent = '🎵';
+        document.getElementById('modalTitle').textContent = "CLUBHOUSE 8-BIT LO-FI JUKEBOX";
+        body.innerHTML = `
+          <div class="space-y-4">
+            <p class="text-sm text-gray-200">Select a procedural 8-bit Lo-Fi synthesizer stream to play while you hang out in TRUE Community:</p>
+            <div class="space-y-2">
+              ${LOFI_TRACKS.map((tr, idx) => `
+                <div class="flex items-center justify-between bg-trueVoid p-3 border-2 ${currentTrackIdx === idx && lofiPlaying ? 'border-trueGreen' : 'border-black'}">
+                  <div>
+                    <div class="font-bold text-white text-base">🎵 ${tr.name}</div>
+                    <div class="text-xs text-gray-400">Web Audio Chiptune Synth</div>
+                  </div>
+                  <button onclick="toggleLofiAudio(${idx}); openStationModal('jukebox')" class="pixel-btn ${currentTrackIdx === idx && lofiPlaying ? 'bg-pixelCoral text-white' : 'bg-trueGreen text-trueVoid'} font-bold px-3 py-1 text-xs">
+                    ${currentTrackIdx === idx && lofiPlaying ? '■ STOP' : '▶ PLAY'}
+                  </button>
+                </div>
+              `).join('')}
+            </div>
+          </div>
+        `;
+      } else {
+        iconEl.textContent = stationId === 'chill' ? '☕' : '💡';
+        document.getElementById('modalTitle').textContent = stationId === 'chill' ? "☕ CHILL COFFEE LOUNGE" : "💡 TIPS & MARKET DESK";
+        body.innerHTML = `
+          <div class="space-y-4 text-gray-200">
+            <p class="text-base">Welcome to the <strong>TRUE Community</strong> hangout corner! No pressure—just friends sharing gaming codes, music, casual market tips, and Phnom Penh coffee meetups.</p>
+            <div class="flex flex-wrap gap-2">
+              <button onclick="openStationModal('arcade')" class="pixel-btn bg-trueGreen text-trueVoid font-bold px-4 py-2 text-xs">🪙 Open Coin Arcade</button>
+              <button onclick="openStationModal('jukebox')" class="pixel-btn bg-pixelPurple text-white font-bold px-4 py-2 text-xs">🎵 Open Lo-Fi Jukebox</button>
+            </div>
+          </div>
+        `;
+      }
+    }
+
+    function closeStationModal() {
+      modalMode = null;
+      const modal = document.getElementById('stationModal');
+      modal.classList.add('hidden');
+      modal.classList.remove('flex');
+    }
+
+    /* ---------- Coin arcade UI ---------- */
+    function setArcadeTab(tab) {
+      if (arcadeBusy) return;
+      arcadeTab = tab;
+      renderArcade();
+    }
+
+    function setBet(game, bet) {
+      if (arcadeBusy) return;
+      arcadeState[game].bet = bet;
+      renderArcade();
+    }
+
+    function betChipsHtml(game) {
+      const cur = arcadeState[game].bet;
+      return BET_OPTIONS.map(b => `
+        <button onclick="setBet('${game}', ${b})" class="pixel-btn px-3 py-1 text-xs font-bold ${b === cur ? 'bg-pixelGold text-trueVoid' : 'bg-trueSlateDark text-white'} ${b > wallet.coins ? 'is-locked' : ''}">${b}</button>
+      `).join('');
+    }
+
+    function flipPanelHtml() {
+      const s = arcadeState.flip;
+      const face = s.face === 'heads' ? '👑' : s.face === 'tails' ? '💚' : '🪙';
+      return `
+        <div class="text-center space-y-4">
+          <div id="coinFace" class="coin-disc">${face}</div>
+          <p id="flipMsg" class="text-base font-bold min-h-[1.5rem] ${s.cls || 'text-gray-200'}">${esc(s.msg || t('flip_intro'))}</p>
+          <div class="flex items-center justify-center gap-2 flex-wrap">
+            <span class="text-xs text-gray-300 font-bold">${esc(t('bet_label'))}</span>${betChipsHtml('flip')}
+          </div>
+          <div class="flex justify-center gap-3 flex-wrap">
+            <button onclick="playFlip('heads')" class="pixel-btn bg-trueGreen text-trueVoid font-bold px-5 py-2 text-sm">👑 ${esc(t('heads'))}</button>
+            <button onclick="playFlip('tails')" class="pixel-btn bg-pixelPurple text-white font-bold px-5 py-2 text-sm">💚 ${esc(t('tails'))}</button>
+          </div>
+          <p class="text-xs text-gray-400">${esc(t('flip_rules'))}</p>
+        </div>`;
+    }
+
+    function slotsPanelHtml() {
+      const s = arcadeState.slots;
+      return `
+        <div class="text-center space-y-4">
+          <div class="flex justify-center gap-2">
+            ${[0, 1, 2].map(i => `<div id="reel${i}" class="slot-reel">${SLOT_SYMBOLS[s.reels[i]]}</div>`).join('')}
+          </div>
+          <p id="slotMsg" class="text-base font-bold min-h-[1.5rem] ${s.cls || 'text-gray-200'}">${esc(s.msg || t('slots_intro'))}</p>
+          <div class="flex items-center justify-center gap-2 flex-wrap">
+            <span class="text-xs text-gray-300 font-bold">${esc(t('bet_label'))}</span>${betChipsHtml('slots')}
+          </div>
+          <button onclick="playSlots()" class="pixel-btn bg-pixelGold text-trueVoid font-bold px-8 py-2 text-sm">🎰 ${esc(t('spin_btn'))}</button>
+          <p class="text-xs text-gray-400">${esc(t('slots_paytable'))}</p>
+        </div>`;
+    }
+
+    function tasksPanelHtml() {
+      const rows = TASKS.map(def => {
+        const st = wallet.tasks[def.id] || {};
+        const done = def.id === 'daily' ? true : !!st.completed;
+        const claimed = !!st.claimed;
+        let action;
+        if (claimed) {
+          action = `<span class="text-trueGreen font-bold text-xs">✓ ${esc(t('task_claimed'))}</span>`;
+        } else if (done) {
+          action = `<button onclick="claimTask('${def.id}')" class="pixel-btn bg-pixelGold text-trueVoid font-bold px-3 py-1 text-xs">${esc(t('task_claim'))} +${def.reward}</button>`;
+        } else if (def.id === 'share') {
+          action = `<button onclick="doShare()" class="pixel-btn bg-telegram text-white font-bold px-3 py-1 text-xs">${esc(t('task_share_btn'))}</button>`;
+        } else if (def.id === 'chat') {
+          action = `<button onclick="goChat()" class="pixel-btn bg-trueGreen text-trueVoid font-bold px-3 py-1 text-xs">${esc(t('task_go_chat'))}</button>`;
+        } else {
+          action = `<span class="text-xs text-gray-400">${esc(t('task_pending'))}</span>`;
+        }
+        return `
+          <div class="flex items-center justify-between gap-2 bg-trueVoid p-3 border-2 ${claimed ? 'border-gray-700 opacity-70' : (done ? 'border-pixelGold' : 'border-black')}">
+            <div class="flex items-center gap-3">
+              <span class="text-2xl">${def.icon}</span>
+              <div>
+                <div class="font-bold text-white text-sm">${esc(t(def.nameKey))}</div>
+                <div class="text-xs text-pixelGold font-bold">+${def.reward} 🪙</div>
+              </div>
+            </div>
+            <div>${action}</div>
+          </div>`;
+      }).join('');
+      return `<div class="space-y-2">${rows}</div><p class="text-xs text-gray-400 mt-1">${esc(t('tasks_hint'))}</p>`;
+    }
+
+    function renderArcade() {
+      if (modalMode !== 'arcade') return;
+      const tabBtn = (id, label) => `
+        <button onclick="setArcadeTab('${id}')" class="pixel-btn ${arcadeTab === id ? 'bg-trueGreen text-trueVoid' : 'bg-trueSlateDark text-white'} font-bold px-3 py-1.5 text-xs">${label}</button>`;
+      const n = claimableCount();
+      const panel = arcadeTab === 'slots' ? slotsPanelHtml() : arcadeTab === 'tasks' ? tasksPanelHtml() : flipPanelHtml();
+      document.getElementById('modalBody').innerHTML = `
+        <div class="space-y-4">
+          <div class="flex flex-wrap items-center justify-between gap-2 bg-trueVoid p-3 border-2 border-pixelGold">
+            <div class="text-sm font-bold text-white">${esc(t('wallet_label'))}: <span id="walletCoins" class="text-pixelGold text-xl">🪙 ${wallet.coins}</span></div>
+            <div class="flex gap-1.5 flex-wrap">
+              ${tabBtn('flip', '🪙 ' + esc(t('tab_flip')))}
+              ${tabBtn('slots', '🎰 ' + esc(t('tab_slots')))}
+              ${tabBtn('tasks', '🎁 ' + esc(t('tab_tasks')) + (n ? ` (${n})` : ''))}
+            </div>
+          </div>
+          <div id="arcadePanel">${panel}</div>
+        </div>`;
+    }
+
+    /* ---------- Flip coin ---------- */
+    async function playFlip(side) {
+      if (arcadeBusy || !requireLogin('need_login_arcade')) return;
+      const s = arcadeState.flip;
+      if (wallet.coins < s.bet) { showToast(t('not_enough')); return; }
+
+      arcadeBusy = true;
+      const disc = document.getElementById('coinFace');
+      if (disc) { disc.classList.add('spinning'); disc.textContent = '🪙'; }
+      const started = performance.now();
+      let res = null, err = null;
+      try { res = await walletRpc('flip_coin', { p_bet: s.bet, p_side: side }); } catch (e) { err = e; }
+      await sleep(Math.max(0, 1100 - (performance.now() - started)));
+      arcadeBusy = false;
+
+      if (res) {
+        wallet.coins = Number(res.coins) || 0;
+        s.face = res.result;
+        s.msg = res.win ? `🎉 ${t('you_won')} +${res.net}` : `💀 ${t('you_lost')} ${res.net}`;
+        s.cls = res.win ? 'text-trueGreen' : 'text-pixelCoral';
+        scheduleLeaderboardRefresh();
+      } else {
+        console.warn('Flip failed:', err);
+        s.msg = coinErrorMessage(err);
+        s.cls = 'text-pixelCoral';
+        refreshWallet();
+      }
+      updateProfileUI();
+      renderArcade();
+    }
+
+    /* ---------- Slots ---------- */
+    async function playSlots() {
+      if (arcadeBusy || !requireLogin('need_login_arcade')) return;
+      const s = arcadeState.slots;
+      if (wallet.coins < s.bet) { showToast(t('not_enough')); return; }
+
+      arcadeBusy = true;
+      const reelEls = [0, 1, 2].map(i => document.getElementById('reel' + i));
+      const stopped = [false, false, false];
+      reelEls.forEach(el => el && el.classList.add('spinning'));
+      const msgEl = document.getElementById('slotMsg');
+      if (msgEl) { msgEl.textContent = '…'; msgEl.className = 'text-base font-bold min-h-[1.5rem] text-gray-200'; }
+      const timer = setInterval(() => {
+        reelEls.forEach((el, i) => {
+          if (el && !stopped[i]) el.textContent = SLOT_SYMBOLS[Math.floor(Math.random() * SLOT_SYMBOLS.length)];
+        });
+      }, 70);
+
+      const started = performance.now();
+      let res = null, err = null;
+      try { res = await walletRpc('spin_slot', { p_bet: s.bet }); } catch (e) { err = e; }
+      await sleep(Math.max(0, 900 - (performance.now() - started)));
+
+      if (res) {
+        for (let i = 0; i < 3; i++) {
+          if (i > 0) await sleep(350);
+          stopped[i] = true;
+          const el = reelEls[i];
+          if (el) { el.textContent = SLOT_SYMBOLS[res.reels[i]]; el.classList.remove('spinning'); }
+        }
+      }
+      clearInterval(timer);
+      arcadeBusy = false;
+
+      if (res) {
+        wallet.coins = Number(res.coins) || 0;
+        s.reels = res.reels.map(n => Number(n) || 0);
+        if (res.kind === 'triple') { s.msg = `🎰 ${t('slot_triple')} +${res.net}`; s.cls = 'text-pixelGold'; }
+        else if (res.kind === 'pair') { s.msg = `🙂 ${t('slot_pair')}`; s.cls = 'text-trueGreen'; }
+        else { s.msg = `💀 ${t('you_lost')} ${res.net}`; s.cls = 'text-pixelCoral'; }
+        scheduleLeaderboardRefresh();
+      } else {
+        console.warn('Spin failed:', err);
+        s.msg = coinErrorMessage(err);
+        s.cls = 'text-pixelCoral';
+        refreshWallet();
+      }
+      updateProfileUI();
+      renderArcade();
+    }
+
+    /******************************************************************
+     * 8. SHARED BULLETIN BOARD (SUPABASE `posts`, MEMBERS ONLY WRITE)
+     ******************************************************************/
+    let currentBoardFilter = 'all';
+    // Demo posts shown only while the cloud wall is empty/unreachable. They are
+    // display-only: no id, so they can't be liked, and nothing is stored locally.
+    let bulletinPosts = [
+      {
+        author: 'Sokha_KH',
+        avatar_url: 'https://api.dicebear.com/7.x/pixel-art/svg?seed=Sokha',
+        category: 'game',
+        tag: '🎮 GAMING',
+        color: '#2dce89',
+        text_en: 'Running 5-stack Valorant & MLBB tonight at 9 PM ICT in Discord Voice #1!',
+        text_kh: 'យប់នេះម៉ោង 9 យើងលេង Valorant និង MLBB ជុំគ្នាក្នុង Discord Voice #1!',
+        likes: 19
+      },
+      {
+        author: 'Dara_Gold',
+        avatar_url: 'https://api.dicebear.com/7.x/pixel-art/svg?seed=Dara',
+        category: 'tips',
+        tag: '💡 TIP SHARE',
+        color: '#fbbf24',
+        text_en: 'Friendly tip: Never trade high-impact CPI news without a stop-loss. Stay safe!',
+        text_kh: 'គន្លឹះមិត្តភាព៖ កុំជួញដូរពេលមានព័ត៌មានធំៗដោយគ្មានការកំណត់ Stop-loss ឱ្យសោះ!',
+        likes: 27
+      },
+      {
+        author: 'Malis_Beats',
+        avatar_url: 'https://api.dicebear.com/7.x/pixel-art/svg?seed=Malis',
+        category: 'music',
+        tag: '🎵 MUSIC',
+        color: '#a855f7',
+        text_en: 'Late night study & coding Lo-Fi playlist is live in the Telegram group!',
+        text_kh: 'បញ្ជីបទចម្រៀង Lo-Fi សម្រាប់ស្តាប់ពេលរៀន និងធ្វើការ មាននៅក្នុង Telegram ហើយ!',
+        likes: 15
+      }
+    ];
+    const likedPostIds = new Set(); // this session only, to stop double-click spam
+
+    async function fetchBulletinPosts() {
+      if (isSupabaseConnected) {
+        const { data, error } = await supabaseClient
+          .from('posts')
+          .select('*')
+          .order('created_at', { ascending: false })
+          .limit(18);
+        if (!error && data && data.length > 0) {
+          bulletinPosts = data;
+        }
+      }
+      renderBulletinBoard();
+    }
+
+    function renderBulletinBoard() {
+      const grid = document.getElementById('bulletinGrid');
+      const filtered = currentBoardFilter === 'all'
+        ? bulletinPosts
+        : bulletinPosts.filter(p => p.category === currentBoardFilter);
+
+      grid.innerHTML = filtered.map((post) => {
+        // Use the index in the FULL list so likes hit the right post even when a filter is active
+        const realIdx = bulletinPosts.indexOf(post);
+        const color = safeColor(post.color);
+        const canLike = !!post.id;
+        const text = currentLang === 'kh' ? (post.text_kh || post.text_en) : post.text_en;
+        return `
+        <div class="pixel-window-dark p-4 flex flex-col justify-between border-t-4" style="border-top-color:${color}">
+          <div>
+            <div class="flex items-center justify-between mb-2">
+              <span class="text-xs font-bold px-2 py-0.5 bg-trueVoid border border-gray-700" style="color:${color}">${esc(post.tag)}</span>
+              <div class="flex items-center gap-1.5">
+                <img src="${esc(safeUrl(post.avatar_url, post.author))}" class="w-5 h-5 border border-gray-600" />
+                <span class="text-xs text-gray-300 font-bold">@${esc(post.author)}</span>
+              </div>
+            </div>
+            <p class="text-gray-100 text-base my-2">${esc(text)}</p>
+          </div>
+          <div class="pt-2 border-t border-gray-800 flex items-center justify-between text-xs text-gray-400">
+            <span>TRUE Cloud Wall</span>
+            <button ${canLike ? `onclick="likePost(${realIdx})"` : 'disabled'} class="pixel-btn bg-trueVoid text-trueGreen px-2.5 py-0.5 font-bold auth-only ${isLoggedIn() ? '' : 'is-locked'} ${canLike ? '' : 'opacity-60 cursor-default'}">💚 ${Number(post.likes) || 0}</button>
+          </div>
+        </div>`;
+      }).join('');
+    }
+
+    function filterBoard(cat) {
+      currentBoardFilter = cat;
+      document.querySelectorAll('.board-tab').forEach(btn => {
+        const active = btn.getAttribute('data-filter') === cat;
+        btn.className = active
+          ? 'board-tab pixel-btn bg-trueGreen text-trueVoid font-bold px-3 py-1.5 text-xs'
+          : 'board-tab pixel-btn bg-trueSlate text-white font-bold px-3 py-1.5 text-xs';
+      });
+      renderBulletinBoard();
+    }
+
+    async function submitBoardPost() {
+      if (!requireLogin('need_login_post')) return;
+      if (!isSupabaseConnected) { showToast(t('server_offline')); return; }
+
+      const cat = document.getElementById('postCategoryInput').value;
+      const msgInput = document.getElementById('postMessageInput');
+      const text = msgInput.value.trim().slice(0, 140);
+      if (!text) return;
+
+      const metaMap = {
+        game: { tag: '🎮 GAMING', color: '#2dce89' },
+        music: { tag: '🎵 MUSIC', color: '#a855f7' },
+        tips: { tag: '💡 TIP SHARE', color: '#fbbf24' },
+        chill: { tag: '☕ CHILL', color: '#38bdf8' }
+      };
+      const meta = metaMap[cat] || metaMap.chill;
+
+      // Only shown on the wall once the database has really accepted it.
+      const { error } = await supabaseClient.from('posts').insert([{
+        user_id: String(currentUser.id),
+        author: currentUser.username,
+        avatar_url: currentUser.avatar_url,
+        category: cat,
+        tag: meta.tag,
+        color: meta.color,
+        text_en: text,
+        text_kh: text,
+        likes: 1
+      }]);
+
+      if (error) {
+        console.warn('Post failed:', error);
+        showToast(t('post_failed'));
+        return;
+      }
+      msgInput.value = '';
+      fetchBulletinPosts();
+    }
+
+    async function likePost(idx) {
+      if (!requireLogin('need_login_like')) return;
+      const post = bulletinPosts[idx];
+      if (!post || !post.id || !isSupabaseConnected) return;
+      const key = String(post.id);
+      if (likedPostIds.has(key)) return;
+
+      likedPostIds.add(key);
+      post.likes = (Number(post.likes) || 0) + 1; // optimistic
+      renderBulletinBoard();
+
+      // Server function: one like per member, requires a login (see supabase_setup.sql)
+      const { data, error } = await supabaseClient.rpc('like_post', { p_post_id: key });
+      if (error) {
+        console.warn('Like failed:', error);
+        likedPostIds.delete(key);
+        post.likes = Math.max(0, post.likes - 1);
+        showToast(t('like_failed'));
+      } else if (typeof data === 'number') {
+        post.likes = data; // server is the source of truth
+      }
+      renderBulletinBoard();
+    }
+
+    /******************************************************************
+     * 9. ADD TO HOME SCREEN (iOS + Android)
+     *    Android/Chrome: one tap opens the native install prompt.
+     *    iOS has no install API, so we show the 3 Safari steps instead.
+     ******************************************************************/
+    const LOGO_URL = 'https://i.postimg.cc/rskLgm5v/TRUE-LOGO.jpg';
+    let deferredInstallPrompt = null;
+
+    const isStandalone = () =>
+      window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone === true;
+    const isIOS = () =>
+      /iphone|ipad|ipod/i.test(navigator.userAgent) ||
+      (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
+
+    window.addEventListener('beforeinstallprompt', (e) => {
+      e.preventDefault();
+      deferredInstallPrompt = e;
+    });
+    window.addEventListener('appinstalled', () => {
+      deferredInstallPrompt = null;
+      updateInstallButton();
+      showToast(t('install_done'));
+    });
+
+    function updateInstallButton() {
+      // Hide the button once the club is already running as an installed app
+      document.getElementById('installBtn').classList.toggle('hidden', isStandalone());
+    }
+
+    async function installApp() {
+      if (deferredInstallPrompt) {
+        const promptEvent = deferredInstallPrompt;
+        deferredInstallPrompt = null; // a prompt event can only be used once
+        promptEvent.prompt();
+        try { await promptEvent.userChoice; } catch (e) {}
+        return;
+      }
+      showInstallHelp();
+    }
+
+    function showInstallHelp() {
+      modalMode = null;
+      const modal = document.getElementById('stationModal');
+      modal.classList.remove('hidden');
+      modal.classList.add('flex');
+      document.getElementById('modalIcon').textContent = '📲';
+      document.getElementById('modalTitle').textContent = t('install_title');
+      const steps = isIOS() ? ['install_ios_1', 'install_ios_2', 'install_ios_3']
+                            : ['install_and_1', 'install_and_2', 'install_and_3'];
+      document.getElementById('modalBody').innerHTML = `
+        <div class="space-y-4">
+          <div class="flex items-center gap-4 bg-trueVoid p-3 border-2 border-trueGreen">
+            <img src="${LOGO_URL}" alt="TRUE Club" class="w-16 h-16 border-2 border-black object-cover" onerror="this.style.display='none'" />
+            <div>
+              <div class="pixel-heading text-sm text-white">TRUE Club</div>
+              <div class="text-xs text-gray-300">${esc(t('install_sub'))}</div>
+            </div>
+          </div>
+          <ol class="space-y-2 text-sm text-gray-100">
+            ${steps.map((k, i) => `
+              <li class="flex gap-3 items-start bg-trueVoid p-3 border-2 border-black">
+                <span class="pixel-heading text-trueGreen text-xs mt-0.5">${i + 1}</span>
+                <span>${esc(t(k))}</span>
+              </li>`).join('')}
+          </ol>
+        </div>`;
+    }
+
+    function registerServiceWorker() {
+      if ('serviceWorker' in navigator && /^https?:$/.test(location.protocol)) {
+        navigator.serviceWorker.register('sw.js').catch(() => {});
+      }
+    }
+
+    // Phnom Penh Clock
+    setInterval(() => {
+      const now = new Date();
+      document.getElementById('phnomPenhClock').textContent =
+        "PHNOM PENH " + now.toLocaleTimeString('en-US', { timeZone: 'Asia/Phnom_Penh', hour12: false });
+    }, 1000);
+
+    // Initialize Everything — the page always starts as a locked Guest;
+    // the Supabase session (if any) then unlocks it.
+    
+    /******************************************************************
+     * 10. WELCOME POPUP ALERT (5S AUTO-CLOSE + ADMIN CONFIG)
+     ******************************************************************/
+    let popupTimer = null;
+    let popupCountdownTimer = null;
+
+    async function checkAndShowWelcomePopup() {
+      if (!isSupabaseConnected) return;
+      try {
+        const { data } = await supabaseClient.from('site_config').select('key, value').eq('key', 'welcome_popup_enabled').maybeSingle();
+        if (data && data.value === 'false') return; // disabled by admin
+
+        // Also check if user already closed it this session
+        if (sessionStorage.getItem('true_popup_shown')) return;
+        sessionStorage.setItem('true_popup_shown', 'true');
+
+        // Show modal after 1s delay
+        setTimeout(openWelcomePopup, 1000);
+      } catch (e) {
+        // Fallback: show popup if config check fails
+        setTimeout(openWelcomePopup, 1000);
+      }
+    }
+
+    function openWelcomePopup() {
+      const modal = document.getElementById('welcomePopupModal');
+      if (!modal) return;
+      modal.classList.remove('hidden');
+      modal.classList.add('flex');
+
+      let secondsLeft = 5;
+      const countEl = document.getElementById('popupCountdown');
+      if (countEl) countEl.textContent = secondsLeft;
+
+      if (popupCountdownTimer) clearInterval(popupCountdownTimer);
+      popupCountdownTimer = setInterval(() => {
+        secondsLeft--;
+        if (countEl) countEl.textContent = Math.max(0, secondsLeft);
+        if (secondsLeft <= 0) {
+          clearInterval(popupCountdownTimer);
+        }
+      }, 1000);
+
+      if (popupTimer) clearTimeout(popupTimer);
+      popupTimer = setTimeout(() => {
+        closeWelcomePopup();
+      }, 5000);
+    }
+
+    function closeWelcomePopup() {
+      if (popupTimer) clearTimeout(popupTimer);
+      if (popupCountdownTimer) clearInterval(popupCountdownTimer);
+      const modal = document.getElementById('welcomePopupModal');
+      if (modal) {
+        modal.classList.add('hidden');
+        modal.classList.remove('flex');
+      }
+    }
+
+    window.addEventListener('DOMContentLoaded', async () => {
+      checkAndShowWelcomePopup();
+      updateProfileUI();
+      updateInstallButton();
+      registerServiceWorker();
+      gameLoop();
+      fetchBulletinPosts();
+      fetchLeaderboard();
+
+      if (!isSupabaseConnected) {
+        setDbStatusUI('warn', 'OFFLINE (GUEST VIEW ONLY)');
+        return;
+      }
+      // Keep in sync with login / logout / session expiry (also from other tabs).
+      // Deferred with setTimeout so we never await Supabase inside this callback.
+      supabaseClient.auth.onAuthStateChange((_event, session) => {
+        setTimeout(() => applySession(session), 0);
+      });
+      const { data } = await supabaseClient.auth.getSession();
+      await applySession(data.session);
+    });
+  </script>
+</body>
+</html>
