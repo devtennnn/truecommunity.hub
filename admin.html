@@ -1,0 +1,748 @@
+<!DOCTYPE html>
+<html lang="en" class="dark">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>TRUE Community — Admin Control Panel</title>
+  <link rel="icon" href="https://i.postimg.cc/rskLgm5v/TRUE-LOGO.jpg" />
+  <!-- Google Fonts: Press Start 2P, VT323, and Kantumruy Pro (Khmer) -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Kantumruy+Pro:ital,wght@0,400;0,600;0,700;1,400&family=Press+Start+2P&family=VT323&display=swap" rel="stylesheet">
+  <!-- Tailwind CSS -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <!-- Supabase JS SDK v2 -->
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            trueGreen: '#2dce89',
+            trueGreenDark: '#1ea86d',
+            trueSlate: '#394150',
+            trueSlateDark: '#1b2029',
+            trueVoid: '#11141a',
+            discord: '#5865F2',
+            telegram: '#26A5E4',
+            pixelGold: '#fbbf24',
+            pixelCoral: '#ff6b6b',
+            pixelPurple: '#a855f7'
+          },
+          fontFamily: {
+            pixel: ['"Press Start 2P"', '"Kantumruy Pro"', 'monospace'],
+            retro: ['"VT323"', '"Kantumruy Pro"', 'monospace'],
+            khmer: ['"Kantumruy Pro"', 'sans-serif'],
+          }
+        }
+      }
+    }
+  </script>
+
+  <style>
+    * { image-rendering: pixelated; box-sizing: border-box; }
+    body {
+      background-color: #11141a;
+      color: #f3f4f6;
+      font-family: 'VT323', 'Kantumruy Pro', monospace;
+      background-image:
+        radial-gradient(rgba(45, 206, 137, 0.08) 1px, transparent 1px),
+        linear-gradient(to right, rgba(57, 65, 80, 0.14) 1px, transparent 1px),
+        linear-gradient(to bottom, rgba(57, 65, 80, 0.14) 1px, transparent 1px);
+      background-size: 24px 24px, 48px 48px, 48px 48px;
+    }
+    body.lang-kh { font-family: 'Kantumruy Pro', sans-serif !important; line-height: 1.65; }
+    body.lang-kh .pixel-heading { font-family: 'Kantumruy Pro', sans-serif !important; font-weight: 700; }
+    body.lang-en .pixel-heading { font-family: 'Press Start 2P', monospace; line-height: 1.45; }
+
+    .pixel-window {
+      background: #394150;
+      border: 4px solid #0b0d12;
+      box-shadow: inset -4px -4px 0px 0px #252b37, inset 4px 4px 0px 0px #525d72, 6px 6px 0px 0px #0b0d12;
+    }
+    .pixel-window-dark {
+      background: #1b2029;
+      border: 4px solid #0b0d12;
+      box-shadow: inset -4px -4px 0px 0px #12161d, inset 4px 4px 0px 0px #2b3240, 6px 6px 0px 0px #0b0d12;
+    }
+    .pixel-btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      border: 3px solid #0b0d12;
+      box-shadow: inset -3px -3px 0px 0px rgba(0,0,0,0.35), inset 3px 3px 0px 0px rgba(255,255,255,0.25), 4px 4px 0px 0px #0b0d12;
+      transition: transform 0.08s ease;
+      cursor: pointer;
+      user-select: none;
+    }
+    .pixel-btn:hover { transform: translate(-1px, -1px); }
+    .pixel-btn:active { transform: translate(2px, 2px); }
+  </style>
+</head>
+<body class="lang-en min-h-screen flex flex-col">
+
+  <!-- TOP STATUS BAR -->
+  <div class="bg-trueVoid border-b-2 border-trueSlate text-xs py-1.5 px-4 flex flex-wrap items-center justify-between gap-2">
+    <div class="flex items-center gap-3">
+      <span id="adminStatusBadge" class="inline-flex items-center gap-1.5 text-pixelGold font-bold">
+        <span class="w-2 h-2 bg-pixelGold inline-block animate-ping"></span>
+        <span>CHECKING ADMIN SESSION...</span>
+      </span>
+      <span class="text-gray-400 hidden sm:inline">TRUE_ADMIN_CONSOLE.EXE v2.0</span>
+    </div>
+    <div class="flex items-center gap-3">
+      <a href="index.html" class="text-trueGreen hover:underline font-bold">⬅ <span data-i18n="back_hub">Back to 2D Clubhouse</span></a>
+      <span id="phnomPenhClock" class="text-gray-400 font-mono">ICT --:--:--</span>
+    </div>
+  </div>
+
+  <!-- HEADER -->
+  <header class="bg-trueSlateDark border-b-4 border-black px-4 py-3 sticky top-0 z-30">
+    <div class="max-w-7xl mx-auto flex flex-wrap items-center justify-between gap-3">
+      <div class="flex items-center gap-3">
+        <div class="w-10 h-10 bg-trueGreen border-2 border-black flex items-center justify-center shadow-[3px_3px_0_#000] font-bold text-trueVoid text-xl">
+          ⚙️
+        </div>
+        <div>
+          <div class="flex items-center gap-2">
+            <span class="pixel-heading text-sm md:text-base text-white">TRUE ADMIN</span>
+            <span class="bg-pixelGold text-trueVoid font-bold px-1.5 py-0.5 text-xs border border-black">CONTROL</span>
+          </div>
+          <p class="text-xs text-gray-300" data-i18n="header_sub">Platform Links • User & Coin Manager • Moderation</p>
+        </div>
+      </div>
+
+      <div class="flex items-center gap-2.5">
+        <button id="loginBtn" onclick="loginWithDiscord()" class="pixel-btn bg-discord text-white px-3.5 py-1.5 text-sm font-bold">
+          Login with Discord
+        </button>
+
+        <div id="adminProfileBar" class="hidden items-center gap-2 bg-trueVoid border-2 border-trueGreen px-2.5 py-1">
+          <img id="adminAvatar" src="" class="w-6 h-6 border border-trueGreen" />
+          <span id="adminName" class="text-xs font-bold text-white">Admin</span>
+          <button onclick="logoutAdmin()" class="text-xs text-gray-400 hover:text-pixelCoral ml-1">✕</button>
+        </div>
+
+        <div class="flex bg-trueVoid p-1 border-2 border-black">
+          <button id="btnLangEN" onclick="setLanguage('en')" class="px-2 py-0.5 text-xs font-bold bg-trueGreen text-trueVoid">EN</button>
+          <button id="btnLangKH" onclick="setLanguage('kh')" class="px-2 py-0.5 text-xs font-bold text-gray-300 font-khmer">ខ្មែរ</button>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <!-- MAIN CONTAINER -->
+  <main class="flex-grow max-w-7xl w-full mx-auto px-4 py-6">
+
+    <!-- ACCESS DENIED / NOT LOGGED IN GATE -->
+    <div id="accessGate" class="pixel-window-dark p-8 text-center max-w-xl mx-auto my-8">
+      <div class="text-5xl mb-3">🔐</div>
+      <h1 id="gateTitle" class="pixel-heading text-base md:text-lg text-pixelGold mb-2" data-i18n="gate_title">ADMIN ACCESS REQUIRED</h1>
+      <p id="gateMessage" class="text-gray-300 text-base mb-5" data-i18n="gate_desc">
+        Please login with an authorized Discord Admin account. If you are the owner, make sure you ran supabase_admin.sql and set is_admin = true on your profile.
+      </p>
+      <div class="flex flex-wrap justify-center gap-3">
+        <button onclick="loginWithDiscord()" class="pixel-btn bg-discord text-white font-bold px-5 py-2 text-sm">
+          🔑 Login with Discord
+        </button>
+        <a href="index.html" class="pixel-btn bg-trueSlate text-white font-bold px-4 py-2 text-sm">
+          ⬅ Return to Website
+        </a>
+      </div>
+    </div>
+
+    <!-- ADMIN DASHBOARD CONTENT (UNLOCKED FOR ADMINS) -->
+    <div id="adminContent" class="hidden space-y-6">
+
+      <!-- TOP KPI STATS -->
+      <div class="grid grid-cols-2 lg:grid-cols-4 gap-4">
+        <div class="pixel-window-dark p-4 border-l-4 border-l-trueGreen">
+          <div class="text-xs text-gray-400 uppercase" data-i18n="stat_members">Total Members</div>
+          <div id="statTotalUsers" class="pixel-heading text-xl text-white mt-1">0</div>
+        </div>
+        <div class="pixel-window-dark p-4 border-l-4 border-l-pixelGold">
+          <div class="text-xs text-gray-400 uppercase" data-i18n="stat_coins">Total Coins in Circulation</div>
+          <div id="statTotalCoins" class="pixel-heading text-xl text-pixelGold mt-1">🪙 0</div>
+        </div>
+        <div class="pixel-window-dark p-4 border-l-4 border-l-pixelPurple">
+          <div class="text-xs text-gray-400 uppercase" data-i18n="stat_posts">Bulletin Wall Posts</div>
+          <div id="statTotalPosts" class="pixel-heading text-xl text-white mt-1">0</div>
+        </div>
+        <div class="pixel-window-dark p-4 border-l-4 border-l-telegram">
+          <div class="text-xs text-gray-400 uppercase" data-i18n="stat_admins">Active Admins</div>
+          <div id="statTotalAdmins" class="pixel-heading text-xl text-trueGreen mt-1">0</div>
+        </div>
+      </div>
+
+      <!-- NAVIGATION TABS -->
+      <div class="flex flex-wrap gap-2 border-b-4 border-black pb-3">
+        <button onclick="switchTab('links')" id="tabBtn-links" class="pixel-btn bg-trueGreen text-trueVoid font-bold px-4 py-2 text-sm">
+          🔗 <span data-i18n="tab_links">Platform Links & Config</span>
+        </button>
+        <button onclick="switchTab('users')" id="tabBtn-users" class="pixel-btn bg-trueSlate text-white font-bold px-4 py-2 text-sm">
+          👥 <span data-i18n="tab_users">User & Coin Management</span>
+        </button>
+        <button onclick="switchTab('posts')" id="tabBtn-posts" class="pixel-btn bg-trueSlate text-white font-bold px-4 py-2 text-sm">
+          📌 <span data-i18n="tab_posts">Wall Moderation</span>
+        </button>
+        <button onclick="switchTab('logs')" id="tabBtn-logs" class="pixel-btn bg-trueSlate text-white font-bold px-4 py-2 text-sm">
+          📜 <span data-i18n="tab_logs">Coin Audit Logs</span>
+        </button>
+      </div>
+
+      <!-- TAB 1: PLATFORM LINKS & DIRECTION CONFIGURATION -->
+      <section id="tabPanel-links" class="pixel-window p-6 space-y-5">
+        <div class="flex items-center justify-between border-b-2 border-trueSlateDark pb-3">
+          <div>
+            <h2 class="pixel-heading text-sm md:text-base text-white" data-i18n="cfg_title">PLATFORM DIRECTION LINKS & ANNOUNCEMENTS</h2>
+            <p class="text-sm text-gray-200" data-i18n="cfg_sub">Update where your Discord, Telegram, and community banners redirect visitors.</p>
+          </div>
+          <button onclick="saveSiteConfig()" class="pixel-btn bg-trueGreen text-trueVoid font-bold px-5 py-2 text-sm">
+            💾 <span data-i18n="btn_save_cfg">Save All Changes</span>
+          </button>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
+          <!-- Discord Invite Link -->
+          <div class="pixel-window-dark p-4 space-y-2">
+            <label class="text-sm font-bold text-discord flex items-center gap-2">
+              <span>💬 DISCORD SERVER INVITE URL</span>
+            </label>
+            <input id="cfg_discord_url" type="url" placeholder="https://discord.gg/your-invite"
+              class="w-full bg-trueVoid border-2 border-black px-3 py-2 text-white text-base focus:outline-none focus:border-trueGreen" />
+            <p class="text-xs text-gray-400">Used for the "Join TRUE Discord" buttons on the main page.</p>
+          </div>
+
+          <!-- Telegram Group Link -->
+          <div class="pixel-window-dark p-4 space-y-2">
+            <label class="text-sm font-bold text-telegram flex items-center gap-2">
+              <span>✈️ TELEGRAM GROUP / CHANNEL URL</span>
+            </label>
+            <input id="cfg_telegram_url" type="url" placeholder="https://t.me/your-group"
+              class="w-full bg-trueVoid border-2 border-black px-3 py-2 text-white text-base focus:outline-none focus:border-trueGreen" />
+            <p class="text-xs text-gray-400">Used for the "Join TRUE Telegram" buttons on the main page.</p>
+          </div>
+
+          <!-- Announcement EN -->
+          <div class="pixel-window-dark p-4 space-y-2">
+            <label class="text-sm font-bold text-trueGreen">📢 ANNOUNCEMENT BANNER (ENGLISH)</label>
+            <input id="cfg_announcement_en" type="text" maxlength="160" placeholder="Welcome to TRUE Clubhouse!"
+              class="w-full bg-trueVoid border-2 border-black px-3 py-2 text-white text-base focus:outline-none focus:border-trueGreen" />
+          </div>
+
+          <!-- Announcement KH -->
+          <div class="pixel-window-dark p-4 space-y-2">
+            <label class="text-sm font-bold text-trueGreen font-khmer">📢 សារជូនដំណឹងលើគេហទំព័រ (ភាសាខ្មែរ)</label>
+            <input id="cfg_announcement_kh" type="text" maxlength="160" placeholder="សូមស្វាគមន៍មកកាន់ TRUE Clubhouse!"
+              class="w-full bg-trueVoid border-2 border-black px-3 py-2 text-white text-base font-khmer focus:outline-none focus:border-trueGreen" />
+          </div>
+
+          <!-- Arcade Switch -->
+          <div class="pixel-window-dark p-4 space-y-2 md:col-span-2 flex flex-wrap items-center justify-between gap-4">
+            <div>
+              <div class="text-sm font-bold text-pixelGold">🕹️ COIN ARCADE STATUS (FLIP COIN & SLOTS)</div>
+              <p class="text-xs text-gray-400">Toggle whether members can currently bet coins in the Arcade.</p>
+            </div>
+            <select id="cfg_arcade_enabled" class="bg-trueVoid border-2 border-black px-4 py-2 text-white font-bold text-sm">
+              <option value="true">🟢 ENABLED (OPEN)</option>
+              <option value="false">🔴 DISABLED (MAINTENANCE)</option>
+            </select>
+          </div>
+        </div>
+      </section>
+
+      <!-- TAB 2: USER & COIN MANAGEMENT -->
+      <section id="tabPanel-users" class="hidden pixel-window p-6 space-y-4">
+        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b-2 border-trueSlateDark pb-3">
+          <div>
+            <h2 class="pixel-heading text-sm md:text-base text-white" data-i18n="usr_title">MEMBER & COIN MANAGEMENT</h2>
+            <p class="text-sm text-gray-200">Search members, edit nicknames/roles, grant or deduct coins, and assign Admin rights.</p>
+          </div>
+          <div class="flex items-center gap-2">
+            <input id="userSearchInput" type="text" placeholder="Search username or ID..." oninput="renderUsersTable()"
+              class="bg-trueVoid border-2 border-black px-3 py-1.5 text-sm text-white focus:outline-none focus:border-trueGreen" />
+            <button onclick="loadUsers()" class="pixel-btn bg-trueVoid text-trueGreen px-3 py-1.5 text-xs font-bold">↻ Refresh</button>
+          </div>
+        </div>
+
+        <div class="overflow-x-auto">
+          <table class="w-full text-left border-collapse">
+            <thead>
+              <tr class="bg-trueVoid text-trueGreen text-xs uppercase border-b-2 border-black">
+                <th class="p-3">Member</th>
+                <th class="p-3">Pixel Role</th>
+                <th class="p-3">Coins (🪙)</th>
+                <th class="p-3">Permissions</th>
+                <th class="p-3 text-right">Actions</th>
+              </tr>
+            </thead>
+            <tbody id="usersTableBody" class="divide-y divide-gray-800 text-sm"></tbody>
+          </table>
+        </div>
+      </section>
+
+      <!-- TAB 3: BULLETIN WALL MODERATION -->
+      <section id="tabPanel-posts" class="hidden pixel-window p-6 space-y-4">
+        <div class="flex items-center justify-between border-b-2 border-trueSlateDark pb-3">
+          <div>
+            <h2 class="pixel-heading text-sm md:text-base text-white">COMMUNITY WALL MODERATION</h2>
+            <p class="text-sm text-gray-200">Review and remove inappropriate or outdated pins from the shared bulletin board.</p>
+          </div>
+          <button onclick="loadPosts()" class="pixel-btn bg-trueVoid text-trueGreen px-3 py-1.5 text-xs font-bold">↻ Refresh</button>
+        </div>
+
+        <div id="adminPostsGrid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4"></div>
+      </section>
+
+      <!-- TAB 4: COIN AUDIT LOGS -->
+      <section id="tabPanel-logs" class="hidden pixel-window p-6 space-y-4">
+        <div class="flex items-center justify-between border-b-2 border-trueSlateDark pb-3">
+          <div>
+            <h2 class="pixel-heading text-sm md:text-base text-white">COIN TRANSACTION AUDIT LOG</h2>
+            <p class="text-sm text-gray-200">Latest 50 coin movements across Daily Rewards, Flip Coin, Slots, and Admin adjustments.</p>
+          </div>
+          <button onclick="loadCoinLogs()" class="pixel-btn bg-trueVoid text-trueGreen px-3 py-1.5 text-xs font-bold">↻ Refresh</button>
+        </div>
+
+        <div class="overflow-x-auto max-h-96">
+          <table class="w-full text-left border-collapse">
+            <thead>
+              <tr class="bg-trueVoid text-pixelGold text-xs uppercase border-b-2 border-black">
+                <th class="p-2.5">Time</th>
+                <th class="p-2.5">Member</th>
+                <th class="p-2.5">Delta</th>
+                <th class="p-2.5">Reason</th>
+              </tr>
+            </thead>
+            <tbody id="logsTableBody" class="divide-y divide-gray-800 text-sm"></tbody>
+          </table>
+        </div>
+      </section>
+
+    </div>
+  </main>
+
+  <!-- EDIT USER / COINS MODAL -->
+  <div id="editUserModal" class="fixed inset-0 bg-black/80 z-50 hidden items-center justify-center p-4">
+    <div class="pixel-window max-w-md w-full bg-trueSlate overflow-hidden">
+      <div class="bg-trueVoid px-4 py-2.5 border-b-4 border-black flex items-center justify-between">
+        <h3 class="pixel-heading text-xs text-trueGreen">✏️ EDIT MEMBER & COINS</h3>
+        <button onclick="closeEditUserModal()" class="pixel-btn bg-pixelCoral text-trueVoid font-bold px-2 py-0.5 text-xs">✕</button>
+      </div>
+      <div class="p-5 space-y-4">
+        <input type="hidden" id="edit_user_id" />
+
+        <div>
+          <label class="text-xs text-gray-300 uppercase font-bold">Username</label>
+          <input id="edit_username" type="text" maxlength="24"
+            class="w-full bg-trueVoid border-2 border-black px-3 py-1.5 text-white text-base mt-1" />
+        </div>
+
+        <div class="grid grid-cols-2 gap-3">
+          <div>
+            <label class="text-xs text-gray-300 uppercase font-bold">Pixel Role</label>
+            <select id="edit_role_idx" class="w-full bg-trueVoid border-2 border-black px-2 py-1.5 text-white text-sm mt-1">
+              <option value="0">🎮 Gamer</option>
+              <option value="1">☕ Chiller</option>
+              <option value="2">🎵 Music Lover</option>
+              <option value="3">💡 Tip Sharer</option>
+            </select>
+          </div>
+          <div>
+            <label class="text-xs text-pixelGold uppercase font-bold">Wallet Coins (🪙)</label>
+            <input id="edit_coins" type="number" min="0" step="10"
+              class="w-full bg-trueVoid border-2 border-pixelGold px-3 py-1.5 text-pixelGold font-bold text-base mt-1" />
+          </div>
+        </div>
+
+        <!-- Quick Coin Add/Subtract Buttons -->
+        <div class="flex flex-wrap gap-1.5 pt-1">
+          <button type="button" onclick="adjustModalCoins(50)" class="pixel-btn bg-trueVoid text-trueGreen px-2.5 py-1 text-xs font-bold">+50 🪙</button>
+          <button type="button" onclick="adjustModalCoins(100)" class="pixel-btn bg-trueVoid text-trueGreen px-2.5 py-1 text-xs font-bold">+100 🪙</button>
+          <button type="button" onclick="adjustModalCoins(500)" class="pixel-btn bg-trueVoid text-pixelGold px-2.5 py-1 text-xs font-bold">+500 🪙</button>
+          <button type="button" onclick="adjustModalCoins(-50)" class="pixel-btn bg-trueVoid text-pixelCoral px-2.5 py-1 text-xs font-bold">-50 🪙</button>
+          <button type="button" onclick="document.getElementById('edit_coins').value = 0" class="pixel-btn bg-trueVoid text-gray-400 px-2.5 py-1 text-xs font-bold">Reset 0</button>
+        </div>
+
+        <div class="flex items-center justify-between bg-trueVoid p-3 border-2 border-black">
+          <label class="flex items-center gap-2 text-sm text-white cursor-pointer">
+            <input id="edit_is_admin" type="checkbox" class="w-4 h-4 accent-trueGreen" />
+            <span>👑 Admin Privileges</span>
+          </label>
+          <label class="flex items-center gap-2 text-sm text-pixelCoral cursor-pointer">
+            <input id="edit_is_banned" type="checkbox" class="w-4 h-4 accent-pixelCoral" />
+            <span>🚫 Ban User</span>
+          </label>
+        </div>
+
+        <div class="flex justify-end gap-2 pt-2">
+          <button onclick="closeEditUserModal()" class="pixel-btn bg-trueSlateDark text-gray-300 px-4 py-1.5 text-xs font-bold">Cancel</button>
+          <button onclick="saveUserChanges()" class="pixel-btn bg-trueGreen text-trueVoid px-5 py-1.5 text-xs font-bold">💾 Save Member</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- TOAST -->
+  <div id="toast" class="hidden fixed bottom-5 right-4 z-50 pixel-window-dark px-4 py-2.5 border-2 border-trueGreen text-sm text-white"></div>
+
+  <script>
+    /******************************************************************
+     * 1. SUPABASE CONNECTION (SAME PROJECT AS INDEX.HTML)
+     ******************************************************************/
+    const SUPABASE_CONFIG = {
+      url: "https://igpbjgxtgxhaspuwbssb.supabase.co",
+      anonKey: "sb_publishable_HbFQHz5wgCJubYHyZvtazw_YjQRxkh8"
+    };
+    const supabaseClient = window.supabase.createClient(SUPABASE_CONFIG.url, SUPABASE_CONFIG.anonKey);
+
+    const ROLES = ['🎮 Gamer', '☕ Chiller', '🎵 Music Lover', '💡 Tip Sharer'];
+    let allUsers = [];
+    let allPosts = [];
+
+    function esc(s) {
+      return String(s ?? '').replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+    }
+
+    function showToast(msg) {
+      const el = document.getElementById('toast');
+      el.textContent = msg;
+      el.classList.remove('hidden');
+      setTimeout(() => el.classList.add('hidden'), 3500);
+    }
+
+    /******************************************************************
+     * 2. BILINGUAL SUPPORT (EN / KH KANTUMRUY PRO)
+     ******************************************************************/
+    const i18n = {
+      en: {
+        back_hub: "Back to 2D Clubhouse",
+        header_sub: "Platform Links • User & Coin Manager • Moderation",
+        gate_title: "ADMIN ACCESS REQUIRED",
+        gate_desc: "Please login with an authorized Discord Admin account. Make sure you ran supabase_admin.sql and set is_admin = true on your profile.",
+        stat_members: "Total Members",
+        stat_coins: "Total Coins in Circulation",
+        stat_posts: "Bulletin Wall Posts",
+        stat_admins: "Active Admins",
+        tab_links: "Platform Links & Config",
+        tab_users: "User & Coin Management",
+        tab_posts: "Wall Moderation",
+        tab_logs: "Coin Audit Logs",
+        cfg_title: "PLATFORM DIRECTION LINKS & ANNOUNCEMENTS",
+        cfg_sub: "Update where your Discord, Telegram, and community banners redirect visitors.",
+        btn_save_cfg: "Save All Changes",
+        usr_title: "MEMBER & COIN MANAGEMENT"
+      },
+      kh: {
+        back_hub: "ត្រឡប់ទៅបន្ទប់ 2D វិញ",
+        header_sub: "កំណត់តំណភ្ជាប់ • គ្រប់គ្រងសមាជិក និងកាក់ • ត្រួតពិនិត្យសារ",
+        gate_title: "តម្រូវឱ្យមានសិទ្ធិអ្នកគ្រប់គ្រង (ADMIN)",
+        gate_desc: "សូមចូលដោយប្រើគណនី Discord ដែលមានសិទ្ធិ Admin។ សូមប្រាកដថាអ្នកបានដំណើរការ supabase_admin.sql និងដាក់ is_admin = true។",
+        stat_members: "សមាជិកសរុប",
+        stat_coins: "កាក់សរុបក្នុងប្រព័ន្ធ",
+        stat_posts: "សារលើក្តារសហគមន៍",
+        stat_admins: "អ្នកគ្រប់គ្រង (Admins)",
+        tab_links: "កំណត់តំណភ្ជាប់ Discord/Telegram",
+        tab_users: "គ្រប់គ្រងសមាជិក & កាក់",
+        tab_posts: "គ្រប់គ្រងសារបង្ហោះ",
+        tab_logs: "ប្រវត្តិកាក់ (Logs)",
+        cfg_title: "កំណត់តំណភ្ជាប់វេទិកា និងសារជូនដំណឹង",
+        cfg_sub: "ផ្លាស់ប្តូរតំណភ្ជាប់ Discord, Telegram និងសារជូនដំណឹងសម្រាប់គេហទំព័រមេ។",
+        btn_save_cfg: "រក្សាទុកការផ្លាស់ប្តូរ",
+        usr_title: "គ្រប់គ្រងសមាជិក និងចំនួនកាក់"
+      }
+    };
+
+    function setLanguage(lang) {
+      document.body.classList.toggle('lang-kh', lang === 'kh');
+      document.body.classList.toggle('lang-en', lang === 'en');
+      document.getElementById('btnLangEN').className = lang === 'en'
+        ? 'px-2 py-0.5 text-xs font-bold bg-trueGreen text-trueVoid'
+        : 'px-2 py-0.5 text-xs font-bold text-gray-300';
+      document.getElementById('btnLangKH').className = lang === 'kh'
+        ? 'px-2 py-0.5 text-xs font-bold bg-trueGreen text-trueVoid font-khmer'
+        : 'px-2 py-0.5 text-xs font-bold text-gray-300 font-khmer';
+
+      document.querySelectorAll('[data-i18n]').forEach(el => {
+        const k = el.getAttribute('data-i18n');
+        if (i18n[lang][k]) el.textContent = i18n[lang][k];
+      });
+    }
+
+    /******************************************************************
+     * 3. AUTHENTICATION & ADMIN VERIFICATION
+     ******************************************************************/
+    async function loginWithDiscord() {
+      await supabaseClient.auth.signInWithOAuth({
+        provider: 'discord',
+        options: { redirectTo: window.location.href.split('#')[0] }
+      });
+    }
+
+    async function logoutAdmin() {
+      await supabaseClient.auth.signOut();
+      window.location.reload();
+    }
+
+    async function checkAdminAccess() {
+      const { data: { session } } = await supabaseClient.auth.getSession();
+      const badge = document.getElementById('adminStatusBadge');
+
+      if (!session || !session.user) {
+        badge.innerHTML = `<span class="w-2 h-2 bg-pixelCoral inline-block"></span><span>NOT LOGGED IN</span>`;
+        return;
+      }
+
+      const u = session.user;
+      const meta = u.user_metadata || {};
+      document.getElementById('loginBtn').classList.add('hidden');
+      const bar = document.getElementById('adminProfileBar');
+      bar.classList.remove('hidden');
+      bar.classList.add('flex');
+      document.getElementById('adminAvatar').src = meta.avatar_url || 'https://api.dicebear.com/7.x/pixel-art/svg?seed=Admin';
+      document.getElementById('adminName').textContent = meta.full_name || meta.name || 'Admin';
+
+      // Verify is_admin via RPC
+      const { data: isAdmin, error } = await supabaseClient.rpc('is_current_user_admin');
+      if (error || !isAdmin) {
+        badge.innerHTML = `<span class="w-2 h-2 bg-pixelCoral inline-block"></span><span>LOGGED IN (NOT ADMIN)</span>`;
+        document.getElementById('gateTitle').textContent = "ACCOUNT IS NOT AN ADMIN YET";
+        document.getElementById('gateMessage').innerHTML =
+          `Your Discord ID is <code class="bg-trueVoid px-2 py-0.5 text-trueGreen">${esc(u.id)}</code>.<br><br>` +
+          `Run this in your Supabase SQL Editor to grant yourself Admin access:<br>` +
+          `<code class="block bg-trueVoid p-2 mt-2 text-xs text-pixelGold select-all">update public.profiles set is_admin = true where id = '${esc(u.id)}';</code>`;
+        return;
+      }
+
+      // Unlock Admin Console
+      badge.className = "inline-flex items-center gap-1.5 text-trueGreen font-bold";
+      badge.innerHTML = `<span class="w-2 h-2 bg-trueGreen inline-block animate-ping"></span><span>ADMIN VERIFIED</span>`;
+      document.getElementById('accessGate').classList.add('hidden');
+      document.getElementById('adminContent').classList.remove('hidden');
+
+      await Promise.all([loadSiteConfig(), loadUsers(), loadPosts(), loadCoinLogs()]);
+    }
+
+    /******************************************************************
+     * 4. TAB SWITCHING
+     ******************************************************************/
+    function switchTab(tab) {
+      ['links', 'users', 'posts', 'logs'].forEach(t => {
+        document.getElementById('tabPanel-' + t).classList.toggle('hidden', t !== tab);
+        document.getElementById('tabBtn-' + t).className = t === tab
+          ? 'pixel-btn bg-trueGreen text-trueVoid font-bold px-4 py-2 text-sm'
+          : 'pixel-btn bg-trueSlate text-white font-bold px-4 py-2 text-sm';
+      });
+    }
+
+    /******************************************************************
+     * 5. PLATFORM DIRECTION LINKS & SITE CONFIG
+     ******************************************************************/
+    async function loadSiteConfig() {
+      const { data } = await supabaseClient.from('site_config').select('key, value');
+      if (!data) return;
+      data.forEach(row => {
+        const el = document.getElementById('cfg_' + row.key);
+        if (el) el.value = row.value;
+      });
+    }
+
+    async function saveSiteConfig() {
+      const keys = ['discord_url', 'telegram_url', 'announcement_en', 'announcement_kh', 'arcade_enabled'];
+      const payload = keys.map(k => ({
+        key: k,
+        value: (document.getElementById('cfg_' + k)?.value || '').trim()
+      }));
+
+      const { error } = await supabaseClient.rpc('admin_save_config', { p_configs: payload });
+      if (error) {
+        showToast('❌ Failed: ' + error.message);
+      } else {
+        showToast('✅ Platform direction links & settings saved!');
+      }
+    }
+
+    /******************************************************************
+     * 6. USER & COIN MANAGEMENT
+     ******************************************************************/
+    async function loadUsers() {
+      const { data, error } = await supabaseClient.rpc('admin_list_users');
+      if (error) {
+        console.warn('admin_list_users error:', error);
+        return;
+      }
+      allUsers = data || [];
+      updateKPIs();
+      renderUsersTable();
+    }
+
+    function updateKPIs() {
+      document.getElementById('statTotalUsers').textContent = allUsers.length;
+      const totalCoins = allUsers.reduce((sum, u) => sum + (Number(u.coins) || 0), 0);
+      document.getElementById('statTotalCoins').textContent = '🪙 ' + totalCoins.toLocaleString();
+      document.getElementById('statTotalAdmins').textContent = allUsers.filter(u => u.is_admin).length;
+    }
+
+    function renderUsersTable() {
+      const q = (document.getElementById('userSearchInput')?.value || '').toLowerCase().trim();
+      const filtered = !q
+        ? allUsers
+        : allUsers.filter(u => (u.username || '').toLowerCase().includes(q) || (u.id || '').toLowerCase().includes(q));
+
+      const tbody = document.getElementById('usersTableBody');
+      tbody.innerHTML = filtered.map(u => `
+        <tr class="hover:bg-trueVoid/60">
+          <td class="p-3 flex items-center gap-2.5">
+            <img src="${esc(u.avatar_url || 'https://api.dicebear.com/7.x/pixel-art/svg?seed=' + u.username)}" class="w-8 h-8 border border-gray-600 bg-trueVoid" />
+            <div>
+              <div class="font-bold text-white">${esc(u.username)}</div>
+              <div class="text-xs text-gray-400 font-mono">${esc(u.id.slice(0, 18))}...</div>
+            </div>
+          </td>
+          <td class="p-3 text-gray-200">${esc(ROLES[u.role_idx] || ROLES[0])}</td>
+          <td class="p-3 font-bold text-pixelGold">🪙 ${Number(u.coins) || 0}</td>
+          <td class="p-3 space-x-1">
+            ${u.is_admin ? '<span class="bg-pixelGold text-trueVoid text-xs px-2 py-0.5 font-bold">👑 ADMIN</span>' : '<span class="bg-trueVoid text-gray-400 text-xs px-2 py-0.5">MEMBER</span>'}
+            ${u.is_banned ? '<span class="bg-pixelCoral text-white text-xs px-2 py-0.5 font-bold">🚫 BANNED</span>' : ''}
+          </td>
+          <td class="p-3 text-right">
+            <button onclick="openEditUserModal('${esc(u.id)}')" class="pixel-btn bg-trueGreen text-trueVoid font-bold px-3 py-1 text-xs">
+              ✏️ Manage
+            </button>
+          </td>
+        </tr>
+      `).join('');
+    }
+
+    function openEditUserModal(userId) {
+      const u = allUsers.find(x => x.id === userId);
+      if (!u) return;
+      document.getElementById('edit_user_id').value = u.id;
+      document.getElementById('edit_username').value = u.username || '';
+      document.getElementById('edit_role_idx').value = u.role_idx || 0;
+      document.getElementById('edit_coins').value = Number(u.coins) || 0;
+      document.getElementById('edit_is_admin').checked = !!u.is_admin;
+      document.getElementById('edit_is_banned').checked = !!u.is_banned;
+
+      const modal = document.getElementById('editUserModal');
+      modal.classList.remove('hidden');
+      modal.classList.add('flex');
+    }
+
+    function closeEditUserModal() {
+      const modal = document.getElementById('editUserModal');
+      modal.classList.add('hidden');
+      modal.classList.remove('flex');
+    }
+
+    function adjustModalCoins(delta) {
+      const input = document.getElementById('edit_coins');
+      input.value = Math.max(0, (parseInt(input.value, 10) || 0) + delta);
+    }
+
+    async function saveUserChanges() {
+      const uid = document.getElementById('edit_user_id').value;
+      const username = document.getElementById('edit_username').value.trim();
+      const roleIdx = parseInt(document.getElementById('edit_role_idx').value, 10) || 0;
+      const newCoins = Math.max(0, parseInt(document.getElementById('edit_coins').value, 10) || 0);
+      const isAdmin = document.getElementById('edit_is_admin').checked;
+      const isBanned = document.getElementById('edit_is_banned').checked;
+
+      const { error: err1 } = await supabaseClient.rpc('admin_update_user', {
+        p_user_id: uid,
+        p_username: username,
+        p_role_idx: roleIdx,
+        p_is_admin: isAdmin,
+        p_is_banned: isBanned
+      });
+
+      const { error: err2 } = await supabaseClient.rpc('admin_set_user_coins', {
+        p_user_id: uid,
+        p_new_coins: newCoins,
+        p_reason: 'dashboard_edit'
+      });
+
+      if (err1 || err2) {
+        showToast('❌ Update error: ' + ((err1 || err2).message));
+        return;
+      }
+
+      closeEditUserModal();
+      showToast('✅ Member profile & coins updated!');
+      await Promise.all([loadUsers(), loadCoinLogs()]);
+    }
+
+    /******************************************************************
+     * 7. BULLETIN WALL MODERATION
+     ******************************************************************/
+    async function loadPosts() {
+      const { data } = await supabaseClient
+        .from('posts')
+        .select('*')
+        .order('created_at', { ascending: false })
+        .limit(30);
+      allPosts = data || [];
+      document.getElementById('statTotalPosts').textContent = allPosts.length;
+
+      const grid = document.getElementById('adminPostsGrid');
+      grid.innerHTML = allPosts.map(p => `
+        <div class="pixel-window-dark p-4 flex flex-col justify-between border-t-4" style="border-top-color:${esc(p.color || '#2dce89')}">
+          <div>
+            <div class="flex items-center justify-between text-xs text-gray-400 mb-2">
+              <span class="font-bold text-white">@${esc(p.author)}</span>
+              <span>💚 ${Number(p.likes) || 0}</span>
+            </div>
+            <p class="text-gray-100 text-base mb-3">${esc(p.text_en)}</p>
+          </div>
+          <div class="flex items-center justify-between pt-2 border-t border-gray-800">
+            <span class="text-xs text-gray-500">#${p.id}</span>
+            <button onclick="deletePost(${p.id})" class="pixel-btn bg-pixelCoral text-trueVoid font-bold px-3 py-1 text-xs">
+              🗑️ Delete Pin
+            </button>
+          </div>
+        </div>
+      `).join('');
+    }
+
+    async function deletePost(postId) {
+      if (!confirm('Delete this post from the community wall?')) return;
+      const { error } = await supabaseClient.rpc('admin_delete_post', { p_post_id: postId });
+      if (error) {
+        showToast('❌ Could not delete: ' + error.message);
+      } else {
+        showToast('🗑️ Post deleted');
+        loadPosts();
+      }
+    }
+
+    /******************************************************************
+     * 8. COIN AUDIT LOGS
+     ******************************************************************/
+    async function loadCoinLogs() {
+      const { data } = await supabaseClient.rpc('admin_recent_coin_logs', { p_limit: 50 });
+      const logs = data || [];
+      const tbody = document.getElementById('logsTableBody');
+      tbody.innerHTML = logs.map(l => {
+        const isPos = l.delta >= 0;
+        const timeStr = new Date(l.created_at).toLocaleString('en-US', { timeZone: 'Asia/Phnom_Penh' });
+        return `
+          <tr class="hover:bg-trueVoid/50">
+            <td class="p-2.5 text-xs text-gray-400 font-mono">${esc(timeStr)}</td>
+            <td class="p-2.5 font-bold text-white">${esc(l.username)}</td>
+            <td class="p-2.5 font-bold ${isPos ? 'text-trueGreen' : 'text-pixelCoral'}">${isPos ? '+' : ''}${l.delta} 🪙</td>
+            <td class="p-2.5 text-xs text-gray-300 font-mono">${esc(l.reason)}</td>
+          </tr>
+        `;
+      }).join('');
+    }
+
+    setInterval(() => {
+      document.getElementById('phnomPenhClock').textContent =
+        "PHNOM PENH " + new Date().toLocaleTimeString('en-US', { timeZone: 'Asia/Phnom_Penh', hour12: false });
+    }, 1000);
+
+    window.addEventListener('DOMContentLoaded', checkAdminAccess);
+  </script>
+</body>
+</html>
