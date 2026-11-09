@@ -184,7 +184,7 @@
     <div class="flex items-center gap-3">
       <span id="dbStatusBadge" class="inline-flex items-center gap-1.5 text-trueGreen font-bold">
         <span class="w-2 h-2 bg-trueGreen inline-block animate-ping"></span>
-        <span>CONNECTING SUPABASE...</span>
+        <span>CONNECTING...</span>
       </span>
       <span class="bg-trueSlateDark border border-trueGreen/50 text-trueGreen px-2 py-0.5 font-bold">
         🟢 <span id="onlineCountLabel">1</span> <span data-i18n="hud_online">IN ROOM</span>
@@ -546,7 +546,7 @@
 
   <!-- FOOTER -->
   <footer class="bg-trueVoid border-t-4 border-black py-6 px-4 text-center text-xs text-gray-400">
-    <p>© 2026 <span class="text-trueGreen font-bold">TRUE COMMUNITY</span> — Colors: #2dce89 & #394150 • Kantumruy Pro (KH) • Powered by Supabase Realtime.</p>
+    <p>© 2026 <span class="text-trueGreen font-bold">TRUE COMMUNITY</span> • Powered by TRUE Realtime.</p>
   </footer>
 
   <!-- ================================================================= -->
@@ -1064,7 +1064,7 @@
         if (showNotice) showToast(t('save_failed'));
         return false;
       }
-      setDbStatusUI('live', 'DB: SUPABASE LIVE (SYNCED)');
+      setDbStatusUI('live', 'DB: LIVE (SYNCED)');
       if (showNotice) {
         feedbackEl.textContent = "✅ Saved to Supabase Cloud Database!";
         feedbackEl.className = "text-xs text-trueGreen font-bold";
