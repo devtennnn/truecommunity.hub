@@ -184,7 +184,7 @@
     <div class="flex items-center gap-3">
       <span id="dbStatusBadge" class="inline-flex items-center gap-1.5 text-trueGreen font-bold">
         <span class="w-2 h-2 bg-trueGreen inline-block animate-ping"></span>
-        <span>CONNECTING SUPABASE...</span>
+        <span>CONNECTING...</span>
       </span>
       <span class="bg-trueSlateDark border border-trueGreen/50 text-trueGreen px-2 py-0.5 font-bold">
         🟢 <span id="onlineCountLabel">1</span> <span data-i18n="hud_online">IN ROOM</span>
@@ -401,7 +401,7 @@
                 </button>
               </div>
               <p id="syncFeedbackText" class="text-xs text-pixelGold font-bold">
-                Connected to Supabase. Your score, role & live movement sync in real time!
+                Connected to Servers. Your score, role & live movement sync in real time!
               </p>
             </div>
           </div>
@@ -435,7 +435,7 @@
       <div class="flex flex-col md:flex-row md:items-end justify-between mb-6 gap-4">
         <div>
           <div class="text-xs font-bold text-trueGreen uppercase tracking-widest mb-1" data-i18n="board_eyebrow">
-            SHARED SUPABASE BULLETIN BOARD
+            SHARED DATA BULLETIN BOARD
           </div>
           <h2 class="pixel-heading text-lg md:text-2xl text-white" data-i18n="board_title">
             COMMUNITY TIPS, MUSIC & LFG WALL
@@ -546,7 +546,7 @@
 
   <!-- FOOTER -->
   <footer class="bg-trueVoid border-t-4 border-black py-6 px-4 text-center text-xs text-gray-400">
-    <p>© 2026 <span class="text-trueGreen font-bold">TRUE COMMUNITY</span> — Colors: #2dce89 & #394150 • Kantumruy Pro (KH) • Powered by Supabase Realtime.</p>
+    <p>© 2026 <span class="text-trueGreen font-bold">TRUE COMMUNITY</span> • Powered by Servers Realtime.</p>
   </footer>
 
   <!-- ================================================================= -->
@@ -605,11 +605,11 @@
         btn_say: "SAY",
         lbl_best_score: "COINS",
         btn_set_name: "Save",
-        sync_hint: "Connected to Supabase. Your score, role & live movement sync in real time!",
+        sync_hint: "Connected to Servers. Your score, role & live movement sync in real time!",
         leader_title: "RICHEST PLAYERS",
         btn_refresh: "↻ Refresh",
         leader_footer: "Win coins in the Arcade to climb ranks!",
-        board_eyebrow: "SHARED SUPABASE BULLETIN BOARD",
+        board_eyebrow: "SHARED DATA BULLETIN BOARD",
         board_title: "COMMUNITY TIPS, MUSIC & LFG WALL",
         filter_all: "All",
         filter_game: "Gaming",
@@ -712,7 +712,7 @@
         btn_say: "និយាយ",
         lbl_best_score: "កាក់",
         btn_set_name: "រក្សាទុក",
-        sync_hint: "បានភ្ជាប់ទៅកាន់ Supabase Realtime រួចរាល់! ដើរ និងជជែកផ្ទាល់ជាមួយសមាជិកឯទៀត។",
+        sync_hint: "បានភ្ជាប់ទៅកាន់ Data Realtime រួចរាល់! ដើរ និងជជែកផ្ទាល់ជាមួយសមាជិកឯទៀត។",
         leader_title: "អ្នកមានកាក់ច្រើនជាងគេ",
         btn_refresh: "↻ ផ្ទុកឡើងវិញ",
         leader_footer: "ឈ្នះកាក់ក្នុង Arcade ដើម្បីឡើងចំណាត់ថ្នាក់!",
@@ -1076,9 +1076,9 @@
         if (showNotice) showToast(t('save_failed'));
         return false;
       }
-      setDbStatusUI('live', 'DB: SUPABASE LIVE (SYNCED)');
+      setDbStatusUI('live', 'DB: LIVE (SYNCED)');
       if (showNotice) {
-        feedbackEl.textContent = "✅ Saved to Supabase Cloud Database!";
+        feedbackEl.textContent = "✅ Saved to Cloud Database!";
         feedbackEl.className = "text-xs text-trueGreen font-bold";
       }
       fetchLeaderboard();
@@ -1100,7 +1100,7 @@
       if (isSupabaseConnected) {
         const { data, error } = await supabaseClient.rpc('top_coins', { p_limit: 8 });
         if (!error && Array.isArray(data)) {
-          setDbStatusUI('live', 'DB: SUPABASE LIVE');
+          setDbStatusUI('live', 'DB: LIVE');
           leaders = data;
         } else if (error) {
           console.warn('Leaderboard failed (run supabase_coins.sql?):', error);
